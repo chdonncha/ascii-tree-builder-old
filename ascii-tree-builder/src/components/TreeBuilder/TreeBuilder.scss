@@ -1,29 +1,59 @@
+.container {
+  display: flex;
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.button-container {
+  height: 50px;
+  margin-bottom: 5px;
+}
+
+.row-list, .output-box {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  font-family: monospace;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  width: 400px;
+  height: 300px;
+  overflow-y: auto;
+}
+
+.row-list li {
+  padding: 5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.output-box {
+  white-space: pre-wrap;
+  max-width: 400px;
+  height: 300px;
+  overflow-y: auto;
+  text-align: left;
+  margin-left: 20px;
+  margin-top: 55px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+}
+
+
+.output-content {
+  padding: 5px;
+}
+
 .highlighted {
   background-color: #f5f9fd;
   color: #333;
 }
 
-.row-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  font-family: monospace;
-  font-size: 12px;
-  border: 1px solid #ccc;
-  width: 300px;
-  height: 200px;
-  overflow-y: scroll;
+.hidden-button {
+  visibility: hidden;
 }
 
-.row-list li {
-  padding: 2px 5px;
-  cursor: pointer;
-  text-align: left;
-}
 
-.button-style {
-
-}
-.textarea-style {
-
-}
