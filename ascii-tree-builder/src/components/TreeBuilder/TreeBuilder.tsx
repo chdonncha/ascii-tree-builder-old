@@ -72,7 +72,7 @@ const TreeBuilder: React.FC = () => {
 
   return (
     <div className="container">
-      <div className="left-panel">
+      <div className="input-box">
         <div className="button-container">
           <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={addFolder}>
             Add Folder

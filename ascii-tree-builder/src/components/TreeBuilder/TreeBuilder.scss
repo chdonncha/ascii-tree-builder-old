@@ -2,14 +2,14 @@
   display: flex;
 }
 
-.left-panel {
+.input-box {
   display: flex;
   flex-direction: column;
 }
 
 .button-container {
   height: 50px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .row-list, .output-box {
@@ -17,10 +17,10 @@
   padding: 0;
   margin: 0;
   font-family: monospace;
-  font-size: 16px;
+  font-size: 18px;
   border: 1px solid #ccc;
-  width: 400px;
-  height: 300px;
+  width: 600px;
+  height: 500px;
   overflow-y: auto;
 }
 
@@ -32,16 +32,12 @@
 
 .output-box {
   white-space: pre-wrap;
-  max-width: 400px;
-  height: 300px;
   overflow-y: auto;
   text-align: left;
   margin-left: 20px;
-  margin-top: 55px;
-  font-size: 16px;
+  margin-top: 60px;
   border: 1px solid #ccc;
 }
-
 
 .output-content {
   padding: 5px;
