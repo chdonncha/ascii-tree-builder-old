@@ -7,6 +7,8 @@ const TreeBuilder: React.FC = () => {
   ]);
   const [selectedRow, setSelectedRow] = useState<number>(-1);
   const [asciiRepresentation, setAsciiRepresentation] = useState<string[]>([]);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState('');
 
   useEffect(() => {
     generateAsciiRepresentation();
@@ -115,6 +117,28 @@ const TreeBuilder: React.FC = () => {
     }
   };
 
+  const startRenaming = () => {
+    if (selectedRow >= 0) {
+      setRenameValue(rows[selectedRow].content.trim());
+      setIsRenaming(true);
+    }
+  };
+
+  const handleRenameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRenameValue(e.target.value);
+  };
+
+  const submitRename = (e?: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => {
+    if (e && 'key' in e && e.key !== 'Enter') return;
+
+    if (e) e.preventDefault();
+
+    const newRows = [...rows];
+    newRows[selectedRow].content = ' '.repeat(getIndentation(newRows[selectedRow].content)) + renameValue;
+    setRows(newRows);
+    setIsRenaming(false);
+  };
+
   const generateAsciiRepresentation = () => {
     const asciiRows: string[] = [];
     const linkStack: boolean[] = [];
@@ -184,6 +208,9 @@ const TreeBuilder: React.FC = () => {
           <button className="button-style" disabled={selectedRow <= 0} onClick={stepRowIn}>
             →
           </button>
+          <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={startRenaming}>
+            Rename
+          </button>
         </div>
         <ul className="row-list">
           {rows.map((row, index) => (
@@ -192,16 +219,30 @@ const TreeBuilder: React.FC = () => {
               contentEditable={false}
               className={row.isSelected ? 'highlighted' : ''}
               onClick={() => {
-                const newRows = rows.map((r, idx) => ({
-                  ...r,
-                  isSelected: idx === index,
-                }));
-                setRows(newRows);
-                setSelectedRow(index);
+                if (!isRenaming) {
+                  const newRows = rows.map((r, idx) => ({
+                    ...r,
+                    isSelected: idx === index,
+                  }));
+                  setRows(newRows);
+                  setSelectedRow(index);
+                }
               }}
               style={{ marginLeft: `${(row.content.match(/^ */) || [''])[0].length * 10}px` }}
             >
-              {row.content.trim()}
+              {isRenaming && row.isSelected ? (
+                <input
+                  value={renameValue}
+                  onChange={handleRenameChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitRename(e);
+                  }}
+                  onBlur={submitRename}
+                  autoFocus
+                />
+              ) : (
+                row.content.trim()
+              )}
             </li>
           ))}
         </ul>
