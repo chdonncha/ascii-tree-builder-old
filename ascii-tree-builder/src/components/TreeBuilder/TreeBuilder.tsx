@@ -168,39 +168,55 @@ const TreeBuilder: React.FC = () => {
     const linkStack: boolean[] = [];
 
     rows.forEach((row, index) => {
-      const match = row.content.match(/^ */);
-      const indentation = match ? match[0].length : 0;
+      const indentation = getIndentation(row.content);
 
       const nextRowMatch = rows[index + 1]?.content.match(/^ */);
       const nextRowIndentation = nextRowMatch ? nextRowMatch[0].length : 0;
 
-      const isLast = index === rows.length - 1 || nextRowIndentation <= indentation;
-      const isFile = row.content.trim().startsWith('* ');
+      const isLastAtThisLevel = isLastInBranch(index);
 
       let prefix = '';
 
       for (let i = 0; i < indentation / 2; i++) {
-        if (i < indentation / 2 - 1) {
-          prefix += linkStack[i] ? '│   ' : '    ';
-        }
+        prefix += linkStack[i] ? '│   ' : '    ';
       }
 
-      if (indentation > 0) {
-        prefix += isLast ? '└── ' : '├── ';
+      if (indentation === 0 && index !== 0) {
+        prefix += isLastAtThisLevel ? '└── ' : '├── ';
+      } else if (indentation > 0) {
+        prefix += isLastAtThisLevel ? '└── ' : '├── ';
       }
 
-      linkStack[indentation / 2] = !isLast;
+      linkStack[indentation / 2] = !isLastAtThisLevel;
+
       if (nextRowIndentation < indentation) {
         for (let j = indentation / 2; j >= nextRowIndentation / 2; j--) {
           linkStack[j] = false;
         }
       }
 
-      const content = isFile ? row.content.trim().substring(2) : row.content.trim();
-      asciiRows.push(prefix + content);
+      asciiRows.push(prefix + row.content.trim());
     });
 
     setAsciiRepresentation(asciiRows);
+  };
+
+  const isLastInBranch = (index: number): boolean => {
+    const currentIndentation = getIndentation(rows[index].content);
+
+    for (let i = index + 1; i < rows.length; i++) {
+      const nextIndentation = getIndentation(rows[i].content);
+
+      if (nextIndentation === currentIndentation) {
+        return false;
+      }
+
+      if (nextIndentation < currentIndentation) {
+        return true;
+      }
+    }
+
+    return true;
   };
 
   return (
