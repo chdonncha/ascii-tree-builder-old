@@ -28,8 +28,19 @@ const TreeBuilder: React.FC = () => {
     if (newFileName) {
       const newRows = [...rows];
       const match = rows[selectedRow]?.content.match(/^ */);
-      const indentation = selectedRow >= 0 && match ? match[0].length : 0;
-      newRows.splice(selectedRow + 1, 0, {
+      const indentation = selectedRow >= 0 && match ? match[0].length + 2 : 0; // Incremented by 2 spaces
+      let positionToInsert = selectedRow + 1;
+
+      for (let i = selectedRow + 1; i < rows.length; i++) {
+        const nextMatch = rows[i].content.match(/^ */);
+        const nextIndentation = nextMatch ? nextMatch[0].length : 0;
+        if (nextIndentation <= indentation) {
+          break;
+        }
+        positionToInsert = i + 1;
+      }
+
+      newRows.splice(positionToInsert, 0, {
         content: ' '.repeat(indentation) + '* ' + newFileName,
         isSelected: false,
       });
