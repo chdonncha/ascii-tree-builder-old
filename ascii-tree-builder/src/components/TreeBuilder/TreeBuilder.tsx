@@ -82,8 +82,9 @@ const TreeBuilder: React.FC = () => {
                                 setRows(newRows);
                                 setSelectedRow(index);
                             }}
+                            style={{ marginLeft: `${(row.content.match(/^ */) || [''])[0].length * 10}px` }}
                         >
-                            {row.content}
+                            {row.content.trim()}
                         </li>
                     ))}
                 </ul>
