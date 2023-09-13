@@ -102,6 +102,19 @@ const TreeBuilder: React.FC = () => {
     }
   };
 
+  const stepRowIn = () => {
+    if (selectedRow > 0) {
+      const newRows = [...rows];
+      const currentIndentation = getIndentation(newRows[selectedRow].content);
+      const aboveRowIndentation = getIndentation(newRows[selectedRow - 1].content);
+
+      if (currentIndentation <= aboveRowIndentation) {
+        newRows[selectedRow].content = ' '.repeat(currentIndentation + 2) + newRows[selectedRow].content.trim();
+        setRows(newRows);
+      }
+    }
+  };
+
   const generateAsciiRepresentation = () => {
     const asciiRows: string[] = [];
     const linkStack: boolean[] = [];
@@ -162,12 +175,14 @@ const TreeBuilder: React.FC = () => {
             ↓
           </button>
           <button
-            className={`button-style ${
-              selectedRow < 0 || getIndentation(rows[selectedRow].content) === 0 ? 'hidden-button' : ''
-            }`}
+            className="button-style"
+            disabled={selectedRow < 0 || getIndentation(rows[selectedRow].content) === 0}
             onClick={stepRowOut}
           >
             ←
+          </button>
+          <button className="button-style" disabled={selectedRow <= 0} onClick={stepRowIn}>
+            →
           </button>
         </div>
         <ul className="row-list">
