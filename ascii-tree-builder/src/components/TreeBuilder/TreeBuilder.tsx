@@ -55,6 +55,43 @@ const TreeBuilder: React.FC = () => {
     setSelectedRow(-1);
   };
 
+  const getIndentation = (str: string): number => {
+    const match = str.match(/^ */);
+    return match ? match[0].length : 0;
+  };
+
+  const moveRowUp = () => {
+    if (selectedRow > 0) {
+      const newRows = [...rows];
+      const aboveIndentation = getIndentation(newRows[selectedRow - 1].content);
+
+      // Always match the indentation of the row above
+      newRows[selectedRow].content = ' '.repeat(aboveIndentation) + newRows[selectedRow].content.trim();
+
+      const temp = newRows[selectedRow];
+      newRows[selectedRow] = newRows[selectedRow - 1];
+      newRows[selectedRow - 1] = temp;
+      setSelectedRow(selectedRow - 1);
+      setRows(newRows);
+    }
+  };
+
+  const moveRowDown = () => {
+    if (selectedRow < rows.length - 1) {
+      const newRows = [...rows];
+      const belowIndentation = getIndentation(newRows[selectedRow + 1].content);
+
+      // Always match the indentation of the row below
+      newRows[selectedRow].content = ' '.repeat(belowIndentation) + newRows[selectedRow].content.trim();
+
+      const temp = newRows[selectedRow];
+      newRows[selectedRow] = newRows[selectedRow + 1];
+      newRows[selectedRow + 1] = temp;
+      setSelectedRow(selectedRow + 1);
+      setRows(newRows);
+    }
+  };
+
   const generateAsciiRepresentation = () => {
     const asciiRows: string[] = [];
     const linkStack: boolean[] = []; // to track if a line should be drawn
@@ -109,6 +146,12 @@ const TreeBuilder: React.FC = () => {
           </button>
           <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={deleteRow}>
             Delete
+          </button>
+          <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={moveRowUp}>
+            ↑
+          </button>
+          <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={moveRowDown}>
+            ↓
           </button>
         </div>
         <ul className="row-list">
