@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './TreeBuilder.scss';
 
 const TreeBuilder: React.FC = () => {
@@ -9,18 +9,37 @@ const TreeBuilder: React.FC = () => {
   const [asciiRepresentation, setAsciiRepresentation] = useState<string[]>([]);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     generateAsciiRepresentation();
   }, [rows]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setSelectedRow(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const addFolder = () => {
     const newFolderName = prompt('Enter the new folder name:');
     if (newFolderName) {
       const newRows = [...rows];
-      const match = rows[selectedRow]?.content.match(/^ */);
-      const indentation = selectedRow >= 0 && match ? match[0].length + 2 : 0;
-      newRows.splice(selectedRow + 1, 0, { content: ' '.repeat(indentation) + newFolderName, isSelected: false });
+      if (selectedRow >= 0) {
+        const match = rows[selectedRow]?.content.match(/^ */);
+        const indentation = match ? match[0].length + 2 : 0;
+        newRows.splice(selectedRow + 1, 0, { content: ' '.repeat(indentation) + newFolderName, isSelected: false });
+      } else {
+        // Add to the bottom of the hierarchy
+        newRows.push({ content: newFolderName, isSelected: false });
+      }
       setRows(newRows);
     }
   };
@@ -29,23 +48,28 @@ const TreeBuilder: React.FC = () => {
     const newFileName = prompt('Enter the new file name:');
     if (newFileName) {
       const newRows = [...rows];
-      const match = rows[selectedRow]?.content.match(/^ */);
-      const indentation = selectedRow >= 0 && match ? match[0].length + 2 : 0;
-      let positionToInsert = selectedRow + 1;
+      if (selectedRow >= 0) {
+        const match = rows[selectedRow]?.content.match(/^ */);
+        const indentation = match ? match[0].length + 2 : 0;
+        let positionToInsert = selectedRow + 1;
 
-      for (let i = selectedRow + 1; i < rows.length; i++) {
-        const nextMatch = rows[i].content.match(/^ */);
-        const nextIndentation = nextMatch ? nextMatch[0].length : 0;
-        if (nextIndentation <= indentation) {
-          break;
+        for (let i = selectedRow + 1; i < rows.length; i++) {
+          const nextMatch = rows[i].content.match(/^ */);
+          const nextIndentation = nextMatch ? nextMatch[0].length : 0;
+          if (nextIndentation <= indentation) {
+            break;
+          }
+          positionToInsert = i + 1;
         }
-        positionToInsert = i + 1;
-      }
 
-      newRows.splice(positionToInsert, 0, {
-        content: ' '.repeat(indentation) + '* ' + newFileName,
-        isSelected: false,
-      });
+        newRows.splice(positionToInsert, 0, {
+          content: ' '.repeat(indentation) + '* ' + newFileName,
+          isSelected: false,
+        });
+      } else {
+        // Add to the bottom of the hierarchy
+        newRows.push({ content: '* ' + newFileName, isSelected: false });
+      }
       setRows(newRows);
     }
   };
@@ -181,43 +205,48 @@ const TreeBuilder: React.FC = () => {
 
   return (
     <div className="container">
-      <div className="input-box">
+      <div className="input-box" ref={containerRef}>
         <div className="button-container">
-          <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={addFolder}>
-            Add Folder
-          </button>
-          <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={addFile}>
-            Add File
-          </button>
-          <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={deleteRow}>
-            Delete
-          </button>
-          <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={moveRowUp}>
-            ↑
-          </button>
-          <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={moveRowDown}>
-            ↓
-          </button>
-          <button
-            className="button-style"
-            disabled={selectedRow < 0 || getIndentation(rows[selectedRow].content) === 0}
-            onClick={stepRowOut}
-          >
-            ←
-          </button>
-          <button className="button-style" disabled={selectedRow <= 0} onClick={stepRowIn}>
-            →
-          </button>
-          <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={startRenaming}>
-            Rename
-          </button>
+          <div className="row-container">
+            <button className="button-style" onClick={addFolder}>
+              Add Folder
+            </button>
+            <button className="button-style" onClick={addFile}>
+              Add File
+            </button>
+
+            <button className="button-style" disabled={selectedRow < 0} onClick={deleteRow}>
+              Delete
+            </button>
+            <div className="row-container">
+              <button className="button-style" disabled={selectedRow < 0} onClick={moveRowUp}>
+                ↑
+              </button>
+              <button className="button-style" disabled={selectedRow < 0} onClick={moveRowDown}>
+                ↓
+              </button>
+              <button
+                className="button-style"
+                disabled={selectedRow < 0 || getIndentation(rows[selectedRow].content) === 0}
+                onClick={stepRowOut}
+              >
+                ←
+              </button>
+              <button className="button-style" disabled={selectedRow <= 0} onClick={stepRowIn}>
+                →
+              </button>
+              <button className="button-style" disabled={selectedRow < 0} onClick={startRenaming}>
+                Rename
+              </button>
+            </div>
+          </div>
         </div>
         <ul className="row-list">
           {rows.map((row, index) => (
             <li
               key={index}
               contentEditable={false}
-              className={row.isSelected ? 'highlighted' : ''}
+              className={index === selectedRow ? 'highlighted' : ''}
               onClick={() => {
                 if (!isRenaming) {
                   const newRows = rows.map((r, idx) => ({
