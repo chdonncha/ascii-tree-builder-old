@@ -57,6 +57,7 @@ const TreeBuilder: React.FC = () => {
 
   const generateAsciiRepresentation = () => {
     const asciiRows: string[] = [];
+    const linkStack: boolean[] = []; // to track if a line should be drawn
 
     rows.forEach((row, index) => {
       const match = row.content.match(/^ */);
@@ -68,10 +69,25 @@ const TreeBuilder: React.FC = () => {
       const isLast = index === rows.length - 1 || nextRowIndentation <= indentation;
       const isFile = row.content.trim().startsWith('* ');
 
-      let prefix = ' '.repeat(Math.max(0, indentation - 2));
+      let prefix = '';
+
+      // Draw the existing lines for levels above
+      for (let i = 0; i < indentation / 2; i++) {
+        if (i < indentation / 2 - 1) {
+          prefix += linkStack[i] ? '│   ' : '    ';
+        }
+      }
 
       if (indentation > 0) {
         prefix += isLast ? '└── ' : '├── ';
+      }
+
+      // Update the link stack
+      linkStack[indentation / 2] = !isLast;
+      if (nextRowIndentation < indentation) {
+        for (let j = indentation / 2; j >= nextRowIndentation / 2; j--) {
+          linkStack[j] = false;
+        }
       }
 
       const content = isFile ? row.content.trim().substring(2) : row.content.trim();
