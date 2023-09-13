@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import './TreeBuilder.scss';
 
 const TreeBuilder: React.FC = () => {
-    const [rows, setRows] = useState<string[]>(['Root']);
+    const [rows, setRows] = useState<{ content: string, isSelected: boolean }[]>([{ content: 'Root', isSelected: false }]);
     const [selectedRow, setSelectedRow] = useState<number>(-1);
     const [asciiRepresentation, setAsciiRepresentation] = useState<string[]>([]);
 
@@ -13,9 +14,20 @@ const TreeBuilder: React.FC = () => {
         const newFolderName = prompt('Enter the new folder name:');
         if (newFolderName) {
             const newRows = [...rows];
-            const match = rows[selectedRow]?.match(/^ */);
+            const match = rows[selectedRow]?.content.match(/^ */);
             const indentation = selectedRow >= 0 && match ? match[0].length + 2 : 0;
-            newRows.splice(selectedRow + 1, 0, ' '.repeat(indentation) + newFolderName);
+            newRows.splice(selectedRow + 1, 0, { content: ' '.repeat(indentation) + newFolderName, isSelected: false });
+            setRows(newRows);
+        }
+    };
+
+    const addFile = () => {
+        const newFileName = prompt('Enter the new file name:');
+        if (newFileName) {
+            const newRows = [...rows];
+            const match = rows[selectedRow]?.content.match(/^ */);
+            const indentation = selectedRow >= 0 && match ? match[0].length : 0;
+            newRows.splice(selectedRow + 1, 0, { content: ' '.repeat(indentation) + '* ' + newFileName, isSelected: false });
             setRows(newRows);
         }
     };
@@ -31,14 +43,14 @@ const TreeBuilder: React.FC = () => {
         const asciiRows: string[] = [];
 
         rows.forEach((row, index) => {
-            const match = row.match(/^ */);
+            const match = row.content.match(/^ */);
             const indentation = match ? match[0].length : 0;
 
-            const nextRowMatch = rows[index + 1]?.match(/^ */);
+            const nextRowMatch = rows[index + 1]?.content.match(/^ */);
             const nextRowIndentation = nextRowMatch ? nextRowMatch[0].length : 0;
 
             const isLast = index === rows.length - 1 || nextRowIndentation <= indentation;
-            const isFile = row.trim().startsWith('* ');
+            const isFile = row.content.trim().startsWith('* ');
 
             let prefix = ' '.repeat(Math.max(0, indentation - 2));
 
@@ -46,43 +58,39 @@ const TreeBuilder: React.FC = () => {
                 prefix += isLast ? '└── ' : '├── ';
             }
 
-            const content = isFile ? row.trim().substring(2) : row.trim(); // remove the '* ' for files
+            const content = isFile ? row.content.trim().substring(2) : row.content.trim();
             asciiRows.push(prefix + content);
         });
 
         setAsciiRepresentation(asciiRows);
-    }
-
-    const addFile = () => {
-        const newFileName = prompt('Enter the new file name:');
-        if (newFileName) {
-            const newRows = [...rows];
-            const match = rows[selectedRow]?.match(/^ */);
-            const indentation = selectedRow >= 0 && match ? match[0].length : 0;
-            newRows.splice(selectedRow + 1, 0, ' '.repeat(indentation) + '* ' + newFileName);
-            setRows(newRows);
-        }
     };
 
     return (
         <div style={{ display: 'flex' }}>
             <div>
-                <textarea
-                    className="textarea-style"
-                    rows={10}
-                    cols={50}
-                    value={rows.join('\n')}
-                    readOnly
-                    onClick={(e) => {
-                        const lineNumber = e.currentTarget.value.substr(0, e.currentTarget.selectionStart).split('\n').length - 1;
-                        setSelectedRow(lineNumber);
-                    }}
-                />
-                <br />
+                <ul className="row-list">
+                    {rows.map((row, index) => (
+                        <li
+                            key={index}
+                            contentEditable={false}
+                            className={row.isSelected ? 'highlighted' : ''}
+                            onClick={() => {
+                                const newRows = rows.map((r, idx) => ({
+                                    ...r,
+                                    isSelected: idx === index
+                                }));
+                                setRows(newRows);
+                                setSelectedRow(index);
+                            }}
+                        >
+                            {row.content}
+                        </li>
+                    ))}
+                </ul>
                 {selectedRow >= 0 && (
                     <div>
                         <button className="button-style" onClick={addFolder}>Add Folder</button>
-                        <button className="button-style" onClick={addFile}>Add File</button>  {/* New "Add File" button */}
+                        <button className="button-style" onClick={addFile}>Add File</button>
                         <button className="button-style" onClick={deleteRow}>Delete</button>
                     </div>
                 )}

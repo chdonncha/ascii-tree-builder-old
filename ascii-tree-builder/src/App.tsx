@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.scss';
-import TreeBuilder from './components/TreeBuilder';
+import TreeBuilder from './components/TreeBuilder/TreeBuilder';
 
 function App() {
   return (
