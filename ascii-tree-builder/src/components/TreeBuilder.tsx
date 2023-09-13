@@ -44,7 +44,7 @@ const TreeBuilder: React.FC = () => {
 
             if (indentation > 0) {
                 prefix += isLast ? '└── ' : '├── ';
-            }what
+            }
 
             const content = isFile ? row.trim().substring(2) : row.trim(); // remove the '* ' for files
             asciiRows.push(prefix + content);
