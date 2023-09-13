@@ -28,7 +28,7 @@ const TreeBuilder: React.FC = () => {
     if (newFileName) {
       const newRows = [...rows];
       const match = rows[selectedRow]?.content.match(/^ */);
-      const indentation = selectedRow >= 0 && match ? match[0].length + 2 : 0; // Incremented by 2 spaces
+      const indentation = selectedRow >= 0 && match ? match[0].length + 2 : 0;
       let positionToInsert = selectedRow + 1;
 
       for (let i = selectedRow + 1; i < rows.length; i++) {
@@ -65,7 +65,6 @@ const TreeBuilder: React.FC = () => {
       const newRows = [...rows];
       const aboveIndentation = getIndentation(newRows[selectedRow - 1].content);
 
-      // Always match the indentation of the row above
       newRows[selectedRow].content = ' '.repeat(aboveIndentation) + newRows[selectedRow].content.trim();
 
       const temp = newRows[selectedRow];
@@ -81,7 +80,6 @@ const TreeBuilder: React.FC = () => {
       const newRows = [...rows];
       const belowIndentation = getIndentation(newRows[selectedRow + 1].content);
 
-      // Always match the indentation of the row below
       newRows[selectedRow].content = ' '.repeat(belowIndentation) + newRows[selectedRow].content.trim();
 
       const temp = newRows[selectedRow];
@@ -92,9 +90,21 @@ const TreeBuilder: React.FC = () => {
     }
   };
 
+  const stepRowOut = () => {
+    if (selectedRow > 0) {
+      const newRows = [...rows];
+      const currentIndentation = getIndentation(newRows[selectedRow].content);
+
+      if (currentIndentation > 0) {
+        newRows[selectedRow].content = ' '.repeat(currentIndentation - 2) + newRows[selectedRow].content.trim();
+        setRows(newRows);
+      }
+    }
+  };
+
   const generateAsciiRepresentation = () => {
     const asciiRows: string[] = [];
-    const linkStack: boolean[] = []; // to track if a line should be drawn
+    const linkStack: boolean[] = [];
 
     rows.forEach((row, index) => {
       const match = row.content.match(/^ */);
@@ -108,7 +118,6 @@ const TreeBuilder: React.FC = () => {
 
       let prefix = '';
 
-      // Draw the existing lines for levels above
       for (let i = 0; i < indentation / 2; i++) {
         if (i < indentation / 2 - 1) {
           prefix += linkStack[i] ? '│   ' : '    ';
@@ -119,7 +128,6 @@ const TreeBuilder: React.FC = () => {
         prefix += isLast ? '└── ' : '├── ';
       }
 
-      // Update the link stack
       linkStack[indentation / 2] = !isLast;
       if (nextRowIndentation < indentation) {
         for (let j = indentation / 2; j >= nextRowIndentation / 2; j--) {
@@ -152,6 +160,14 @@ const TreeBuilder: React.FC = () => {
           </button>
           <button className={`button-style ${selectedRow < 0 ? 'hidden-button' : ''}`} onClick={moveRowDown}>
             ↓
+          </button>
+          <button
+            className={`button-style ${
+              selectedRow < 0 || getIndentation(rows[selectedRow].content) === 0 ? 'hidden-button' : ''
+            }`}
+            onClick={stepRowOut}
+          >
+            ←
           </button>
         </div>
         <ul className="row-list">
