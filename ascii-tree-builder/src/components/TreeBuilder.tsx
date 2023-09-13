@@ -38,19 +38,31 @@ const TreeBuilder: React.FC = () => {
             const nextRowIndentation = nextRowMatch ? nextRowMatch[0].length : 0;
 
             const isLast = index === rows.length - 1 || nextRowIndentation <= indentation;
+            const isFile = row.trim().startsWith('* ');
 
             let prefix = ' '.repeat(Math.max(0, indentation - 2));
 
             if (indentation > 0) {
                 prefix += isLast ? '└── ' : '├── ';
-            }
+            }what
 
-            const content = row.trim();
+            const content = isFile ? row.trim().substring(2) : row.trim(); // remove the '* ' for files
             asciiRows.push(prefix + content);
         });
 
         setAsciiRepresentation(asciiRows);
     }
+
+    const addFile = () => {
+        const newFileName = prompt('Enter the new file name:');
+        if (newFileName) {
+            const newRows = [...rows];
+            const match = rows[selectedRow]?.match(/^ */);
+            const indentation = selectedRow >= 0 && match ? match[0].length : 0;
+            newRows.splice(selectedRow + 1, 0, ' '.repeat(indentation) + '* ' + newFileName);
+            setRows(newRows);
+        }
+    };
 
     return (
         <div style={{ display: 'flex' }}>
@@ -70,6 +82,7 @@ const TreeBuilder: React.FC = () => {
                 {selectedRow >= 0 && (
                     <div>
                         <button className="button-style" onClick={addFolder}>Add Folder</button>
+                        <button className="button-style" onClick={addFile}>Add File</button>  {/* New "Add File" button */}
                         <button className="button-style" onClick={deleteRow}>Delete</button>
                     </div>
                 )}
