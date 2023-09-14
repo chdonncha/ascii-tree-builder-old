@@ -163,6 +163,13 @@ const TreeBuilder: React.FC = () => {
     setIsRenaming(false);
   };
 
+  const copyToClipboard = () => {
+    const textToCopy = asciiRepresentation.join('\n');
+    navigator.clipboard.writeText(textToCopy).catch((err) => {
+      console.error('Unable to copy text. Error:', err);
+    });
+  };
+
   const generateAsciiRepresentation = () => {
     const asciiRows: string[] = [];
     const linkStack: boolean[] = [];
@@ -292,7 +299,10 @@ const TreeBuilder: React.FC = () => {
           ))}
         </ul>
       </div>
-      <div className="right-panel">
+      <div className="right-panel mono-font">
+        <button className="button-style" onClick={copyToClipboard}>
+          Copy to Clipboard
+        </button>
         <pre className="output-box">
           <div className="output-content">{asciiRepresentation.join('\n')}</div>
         </pre>
