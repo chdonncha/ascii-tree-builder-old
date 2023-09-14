@@ -4,6 +4,28 @@ import './TreeBuilder.scss';
 const TreeBuilder: React.FC = () => {
   const [rows, setRows] = useState<{ content: string; isSelected: boolean }[]>([
     { content: 'Root', isSelected: false },
+    { content: '  Documents', isSelected: false },
+    { content: '    Reports', isSelected: false },
+    { content: '      * Monthly_Report.txt', isSelected: false },
+    { content: '      * Annual_Report.txt', isSelected: false },
+    { content: '    Invoices', isSelected: false },
+    { content: '  Media', isSelected: false },
+    { content: '    Images', isSelected: false },
+    { content: '      * Profile_Picture.jpg', isSelected: false },
+    { content: '      * Banner.jpg', isSelected: false },
+    { content: '    Videos', isSelected: false },
+    { content: '      * Intro_Video.mp4', isSelected: false },
+    { content: '  Code', isSelected: false },
+    { content: '    Laravel', isSelected: false },
+    { content: '      * web.php', isSelected: false },
+    { content: '      * api.php', isSelected: false },
+    { content: '    ReactJS', isSelected: false },
+    { content: '      * App.tsx', isSelected: false },
+    { content: '      * index.tsx', isSelected: false },
+    { content: '  Games', isSelected: false },
+    { content: '    Retro', isSelected: false },
+    { content: '      * Doom.exe', isSelected: false },
+    { content: '      * Quake.exe', isSelected: false },
   ]);
   const [selectedRow, setSelectedRow] = useState<number>(-1);
   const [asciiRepresentation, setAsciiRepresentation] = useState<string[]>([]);
@@ -75,10 +97,25 @@ const TreeBuilder: React.FC = () => {
   };
 
   const deleteRow = () => {
+    if (selectedRow === -1) return; // If no row is selected, do nothing
+
     const newRows = [...rows];
     newRows.splice(selectedRow, 1);
+
+    // Adjust the selected row after deletion
+    let newRowToSelect = -1;
+
+    // If it wasn't the first row, select the previous row
+    if (selectedRow > 0) {
+      newRowToSelect = selectedRow - 1;
+    }
+    // If it was the first row and there are still rows available, select the next row
+    else if (selectedRow === 0 && newRows.length > 0) {
+      newRowToSelect = 0;
+    }
+
     setRows(newRows);
-    setSelectedRow(-1);
+    setSelectedRow(newRowToSelect);
   };
 
   const getIndentation = (str: string): number => {
