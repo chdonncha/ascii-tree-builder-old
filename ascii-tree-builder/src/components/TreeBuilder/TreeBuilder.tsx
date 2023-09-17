@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './TreeBuilder.scss';
-import Button from '@mui/material/Button';
+import { Button, List, ListItem, TextField } from '@mui/material';
 
 const TreeBuilder: React.FC = () => {
   const [rows, setRows] = useState<{ content: string; isSelected: boolean }[]>([
@@ -335,7 +335,7 @@ const TreeBuilder: React.FC = () => {
           ))}
         </ul>
       </div>
-      <div className="right-panel">
+      <div className="output-box space-left">
         <div className="button-row"></div>
         <div className="button-row">
           <Button variant="contained" className="button-style" onClick={copyToClipboard}>
