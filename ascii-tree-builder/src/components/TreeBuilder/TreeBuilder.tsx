@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './TreeBuilder.scss';
-import { Button, List, ListItem, TextField } from '@mui/material';
+import { Button, Snackbar } from '@mui/material';
 
 const TreeBuilder: React.FC = () => {
   const [rows, setRows] = useState<{ content: string; isSelected: boolean }[]>([
@@ -33,6 +33,7 @@ const TreeBuilder: React.FC = () => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     generateAsciiRepresentation();
@@ -203,9 +204,14 @@ const TreeBuilder: React.FC = () => {
 
   const copyToClipboard = () => {
     const textToCopy = asciiRepresentation.join('\n');
-    navigator.clipboard.writeText(textToCopy).catch((err) => {
-      console.error('Unable to copy text. Error:', err);
-    });
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        setSnackbarOpen(true); // Open the snackbar upon successful copy
+      })
+      .catch((err) => {
+        console.error('Unable to copy text. Error:', err);
+      });
   };
 
   const generateAsciiRepresentation = () => {
@@ -346,6 +352,24 @@ const TreeBuilder: React.FC = () => {
           <div className="output-content">{asciiRepresentation.join('\n')}</div>
         </div>
       </div>
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={(event, reason) => {
+          if (reason === 'timeout') {
+            setSnackbarOpen(false);
+          }
+        }}
+        message="Copied to Clipboard!"
+        action={
+          <React.Fragment>
+            <Button color="primary" size="small" onClick={() => setSnackbarOpen(false)}>
+              CLOSE
+            </Button>
+          </React.Fragment>
+        }
+      />
     </div>
   );
 };
