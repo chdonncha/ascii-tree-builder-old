@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './TreeBuilder.scss';
+import Button from '@mui/material/Button';
 
 const TreeBuilder: React.FC = () => {
   const [rows, setRows] = useState<{ content: string; isSelected: boolean }[]>([
@@ -265,43 +266,41 @@ const TreeBuilder: React.FC = () => {
 
   return (
     <div className="container">
-      <div className="input-box" ref={containerRef}>
-        <div className="button-container">
-          <div className="row-container">
-            <button className="button-style" onClick={addFolder}>
-              Add Folder
-            </button>
-            <button className="button-style" onClick={addFile}>
-              Add File
-            </button>
-
-            <button className="button-style" disabled={selectedRow < 0} onClick={deleteRow}>
-              Delete
-            </button>
-            <div className="row-container">
-              <button className="button-style" disabled={selectedRow < 0} onClick={moveRowUp}>
-                ↑
-              </button>
-              <button className="button-style" disabled={selectedRow < 0} onClick={moveRowDown}>
-                ↓
-              </button>
-              <button
-                className="button-style"
-                disabled={selectedRow < 0 || getIndentation(rows[selectedRow].content) === 0}
-                onClick={stepRowOut}
-              >
-                ←
-              </button>
-              <button className="button-style" disabled={selectedRow <= 0} onClick={stepRowIn}>
-                →
-              </button>
-              <button className="button-style" disabled={selectedRow < 0} onClick={startRenaming}>
-                Rename
-              </button>
-            </div>
-          </div>
+      <div className="input-box">
+        <div className="button-row">
+          <Button variant="contained" className="button-style" onClick={addFolder}>
+            Add Folder
+          </Button>
+          <Button variant="contained" className="button-style" onClick={addFile}>
+            Add File
+          </Button>
+          <Button variant="contained" className="button-style" disabled={selectedRow < 0} onClick={deleteRow}>
+            Delete
+          </Button>
         </div>
-        <ul className="row-list">
+        <div className="button-row">
+          <Button variant="contained" className="button-style" disabled={selectedRow < 0} onClick={moveRowUp}>
+            ↑
+          </Button>
+          <Button variant="contained" className="button-style" disabled={selectedRow < 0} onClick={moveRowDown}>
+            ↓
+          </Button>
+          <Button
+            variant="contained"
+            className="button-style"
+            disabled={selectedRow < 0 || getIndentation(rows[selectedRow].content) === 0}
+            onClick={stepRowOut}
+          >
+            ←
+          </Button>
+          <Button variant="contained" className="button-style" disabled={selectedRow <= 0} onClick={stepRowIn}>
+            →
+          </Button>
+          <Button variant="contained" className="button-style" disabled={selectedRow < 0} onClick={startRenaming}>
+            Rename
+          </Button>
+        </div>
+        <ul className="input-list">
           {rows.map((row, index) => (
             <li
               key={index}
@@ -336,13 +335,16 @@ const TreeBuilder: React.FC = () => {
           ))}
         </ul>
       </div>
-      <div className="right-panel mono-font">
-        <button className="button-style" onClick={copyToClipboard}>
-          Copy to Clipboard
-        </button>
-        <pre className="output-box">
+      <div className="right-panel">
+        <div className="button-row"></div>
+        <div className="button-row">
+          <Button variant="contained" className="button-style" onClick={copyToClipboard}>
+            Copy to Clipboard
+          </Button>
+        </div>
+        <div className="output-list">
           <div className="output-content">{asciiRepresentation.join('\n')}</div>
-        </pre>
+        </div>
       </div>
     </div>
   );

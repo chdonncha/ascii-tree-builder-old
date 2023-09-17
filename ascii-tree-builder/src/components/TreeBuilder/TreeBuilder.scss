@@ -1,21 +1,16 @@
 .container {
   display: flex;
+  align-items: flex-start;
 }
 
-.input-box {
-  display: flex;
-  flex-direction: column;
-}
-
-.button-container {
-  height: 120px;
+.button-row {
+  height: 40px;
   margin-bottom: 10px;
 }
 
-.row-list, .output-box {
+.input-list, .output-list {
   list-style-type: none;
   padding: 0;
-  margin: 0;
   font-family: monospace;
   font-size: 18px;
   border: 1px solid #ccc;
@@ -24,18 +19,17 @@
   overflow-y: auto;
 }
 
-.row-list li {
+.input-list li {
   padding: 5px;
   cursor: pointer;
   text-align: left;
 }
 
-.output-box {
+.output-list {
   white-space: pre-wrap;
   overflow-y: auto;
   text-align: left;
   margin-left: 20px;
-  margin-top: 70px;
   border: 1px solid #ccc;
 }
 
@@ -51,5 +45,14 @@
 .hidden-button {
   visibility: hidden;
 }
+
+ul {
+  margin: 0;
+}
+
+.button-style {
+  height: 40px
+}
+
 
 
