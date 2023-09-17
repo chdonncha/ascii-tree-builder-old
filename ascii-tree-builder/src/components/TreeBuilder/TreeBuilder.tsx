@@ -232,11 +232,7 @@ const TreeBuilder: React.FC = () => {
         prefix += linkStack[i] ? '│   ' : '    ';
       }
 
-      if (indentation === 0 && index !== 0) {
-        prefix += isLastAtThisLevel ? '└── ' : '├── ';
-      } else if (indentation > 0) {
-        prefix += isLastAtThisLevel ? '└── ' : '├── ';
-      }
+      prefix += isLastAtThisLevel ? '└── ' : '├── ';
 
       linkStack[indentation / 2] = !isLastAtThisLevel;
 
