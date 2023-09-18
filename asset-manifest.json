@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/ascii-tree-builder/static/css/main.3d9af02a.css",
+    "main.js": "/ascii-tree-builder/static/js/main.d7a64688.js",
+    "static/js/787.dcd660ac.chunk.js": "/ascii-tree-builder/static/js/787.dcd660ac.chunk.js",
+    "index.html": "/ascii-tree-builder/index.html",
+    "main.3d9af02a.css.map": "/ascii-tree-builder/static/css/main.3d9af02a.css.map",
+    "main.d7a64688.js.map": "/ascii-tree-builder/static/js/main.d7a64688.js.map",
+    "787.dcd660ac.chunk.js.map": "/ascii-tree-builder/static/js/787.dcd660ac.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3d9af02a.css",
+    "static/js/main.d7a64688.js"
+  ]
+}
