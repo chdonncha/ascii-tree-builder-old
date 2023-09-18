@@ -102,7 +102,21 @@ const TreeBuilder: React.FC = () => {
     if (selectedRow === -1) return; // If no row is selected, do nothing
 
     const newRows = [...rows];
-    newRows.splice(selectedRow, 1);
+
+    // Identify the children to delete based on indentation
+    const currentIndentation = getIndentation(newRows[selectedRow].content);
+
+    let lastIndexToDelete = selectedRow;
+    for (let i = selectedRow + 1; i < newRows.length; i++) {
+      if (getIndentation(newRows[i].content) > currentIndentation) {
+        lastIndexToDelete = i;
+      } else {
+        break;
+      }
+    }
+
+    // Delete the selected row and its children
+    newRows.splice(selectedRow, lastIndexToDelete - selectedRow + 1);
 
     // Adjust the selected row after deletion
     let newRowToSelect = -1;
