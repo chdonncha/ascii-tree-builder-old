@@ -280,6 +280,13 @@ const TreeBuilder: React.FC = () => {
     return true;
   };
 
+  const canIndentFurther = (currentIndex: number): boolean => {
+    if (currentIndex === 0) return false;
+    const currentIndentation = getIndentation(rows[currentIndex].content);
+    const prevIndentation = getIndentation(rows[currentIndex - 1].content);
+    return currentIndentation <= prevIndentation;
+  };
+
   return (
     <div className="container">
       <div className="input-box">
@@ -309,7 +316,12 @@ const TreeBuilder: React.FC = () => {
           >
             ←
           </Button>
-          <Button variant="contained" className="button-style" disabled={selectedRow <= 0} onClick={stepRowIn}>
+          <Button
+            variant="contained"
+            className="button-style"
+            disabled={selectedRow <= 0 || !canIndentFurther(selectedRow)}
+            onClick={stepRowIn}
+          >
             →
           </Button>
           <Button variant="contained" className="button-style" disabled={selectedRow < 0} onClick={startRenaming}>
