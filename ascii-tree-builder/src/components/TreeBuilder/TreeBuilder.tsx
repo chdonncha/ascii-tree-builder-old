@@ -1,33 +1,36 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './TreeBuilder.scss';
-import { Button, Snackbar } from '@mui/material';
+import { Button, Snackbar, IconButton } from '@mui/material';
+import FolderIcon from '@mui/icons-material/Folder';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 
 const TreeBuilder: React.FC = () => {
-  const [rows, setRows] = useState<{ content: string; isSelected: boolean }[]>([
-    { content: 'Root', isSelected: false },
-    { content: '  Documents', isSelected: false },
-    { content: '    Reports', isSelected: false },
-    { content: '      * Monthly_Report.txt', isSelected: false },
-    { content: '      * Annual_Report.txt', isSelected: false },
-    { content: '    Invoices', isSelected: false },
-    { content: '  Media', isSelected: false },
-    { content: '    Images', isSelected: false },
-    { content: '      * Profile_Picture.jpg', isSelected: false },
-    { content: '      * Banner.jpg', isSelected: false },
-    { content: '    Videos', isSelected: false },
-    { content: '      * Intro_Video.mp4', isSelected: false },
-    { content: '  Code', isSelected: false },
-    { content: '    Laravel', isSelected: false },
-    { content: '      * web.php', isSelected: false },
-    { content: '      * api.php', isSelected: false },
-    { content: '    ReactJS', isSelected: false },
-    { content: '      * App.tsx', isSelected: false },
-    { content: '      * index.tsx', isSelected: false },
-    { content: '  Games', isSelected: false },
-    { content: '    Retro', isSelected: false },
-    { content: '      * Doom.exe', isSelected: false },
-    { content: '      * Quake.exe', isSelected: false },
+  const [rows, setRows] = useState<{ content: string; isSelected: boolean; type: 'file' | 'folder' }[]>([
+    { content: 'Root/', isSelected: false, type: 'folder' },
+    { content: '  Documents/', isSelected: false, type: 'folder' },
+    { content: '    Reports/', isSelected: false, type: 'folder' },
+    { content: '      Monthly_Report.txt', isSelected: false, type: 'file' },
+    { content: '      Annual_Report.txt', isSelected: false, type: 'file' },
+    { content: '    Invoices/', isSelected: false, type: 'folder' },
+    { content: '  Media/', isSelected: false, type: 'folder' },
+    { content: '    Images/', isSelected: false, type: 'folder' },
+    { content: '      Profile_Picture.jpg', isSelected: false, type: 'file' },
+    { content: '      Banner.jpg', isSelected: false, type: 'file' },
+    { content: '    Videos/', isSelected: false, type: 'folder' },
+    { content: '      Intro_Video.mp4', isSelected: false, type: 'file' },
+    { content: '  Code/', isSelected: false, type: 'folder' },
+    { content: '    Laravel/', isSelected: false, type: 'folder' },
+    { content: '      web.php', isSelected: false, type: 'file' },
+    { content: '      api.php', isSelected: false, type: 'file' },
+    { content: '    ReactJS/', isSelected: false, type: 'folder' },
+    { content: '      App.tsx', isSelected: false, type: 'file' },
+    { content: '      index.tsx', isSelected: false, type: 'file' },
+    { content: '  Games/', isSelected: false, type: 'folder' },
+    { content: '    Retro/', isSelected: false, type: 'folder' },
+    { content: '      Doom', isSelected: false, type: 'file' },
+    { content: '      Quake', isSelected: false, type: 'file' },
   ]);
+
   const [selectedRow, setSelectedRow] = useState<number>(-1);
   const [asciiRepresentation, setAsciiRepresentation] = useState<string[]>([]);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -59,10 +62,14 @@ const TreeBuilder: React.FC = () => {
       if (selectedRow >= 0) {
         const match = rows[selectedRow]?.content.match(/^ */);
         const indentation = match ? match[0].length + 2 : 0;
-        newRows.splice(selectedRow + 1, 0, { content: ' '.repeat(indentation) + newFolderName, isSelected: false });
+        newRows.splice(selectedRow + 1, 0, {
+          content: ' '.repeat(indentation) + newFolderName,
+          isSelected: false,
+          type: 'folder',
+        });
       } else {
         // Add to the bottom of the hierarchy
-        newRows.push({ content: newFolderName, isSelected: false });
+        newRows.push({ content: newFolderName, isSelected: false, type: 'folder' });
       }
       setRows(newRows);
     }
@@ -74,6 +81,7 @@ const TreeBuilder: React.FC = () => {
       const newRows = [...rows];
       if (selectedRow >= 0) {
         const match = rows[selectedRow]?.content.match(/^ */);
+        console.log(match);
         const indentation = match ? match[0].length + 2 : 0;
         let positionToInsert = selectedRow + 1;
 
@@ -89,10 +97,11 @@ const TreeBuilder: React.FC = () => {
         newRows.splice(positionToInsert, 0, {
           content: ' '.repeat(indentation) + '* ' + newFileName,
           isSelected: false,
+          type: 'file',
         });
       } else {
         // Add to the bottom of the hierarchy
-        newRows.push({ content: '* ' + newFileName, isSelected: false });
+        newRows.push({ content: '* ' + newFileName, isSelected: false, type: 'file' });
       }
       setRows(newRows);
     }
@@ -346,6 +355,7 @@ const TreeBuilder: React.FC = () => {
               }}
               style={{ marginLeft: `${(row.content.match(/^ */) || [''])[0].length * 10}px` }}
             >
+              {row.type === 'folder' ? <FolderIcon /> : <InsertDriveFileIcon />}
               {isRenaming && row.isSelected ? (
                 <input
                   value={renameValue}
