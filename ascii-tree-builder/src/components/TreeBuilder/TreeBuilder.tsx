@@ -3,6 +3,7 @@ import './TreeBuilder.scss';
 import { Button, Snackbar, IconButton } from '@mui/material';
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import { useUndoStack } from '../../hooks/useUndoStack';
 
 const TreeBuilder: React.FC = () => {
   const [rows, setRows] = useState<{ content: string; isSelected: boolean; type: 'file' | 'folder' }[]>([
@@ -37,7 +38,7 @@ const TreeBuilder: React.FC = () => {
   const [renameValue, setRenameValue] = useState('');
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [undoStack, setUndoStack] = useState<any[]>([]);
+  const { addToUndoStack, undo } = useUndoStack(rows, setRows);
 
   useEffect(() => {
     generateAsciiRepresentation();
@@ -57,7 +58,7 @@ const TreeBuilder: React.FC = () => {
   }, []);
 
   const addFolder = () => {
-    addToUndoStack();
+    addToUndoStack(rows);
     const newFolderName = prompt('Enter the new folder name:');
     if (newFolderName) {
       const newRows = [...rows];
@@ -78,7 +79,7 @@ const TreeBuilder: React.FC = () => {
   };
 
   const addFile = () => {
-    addToUndoStack();
+    addToUndoStack(rows);
     const newFileName = prompt('Enter the new file name:');
     if (newFileName) {
       const newRows = [...rows];
@@ -153,7 +154,7 @@ const TreeBuilder: React.FC = () => {
 
   const moveRowUp = () => {
     if (selectedRow > 0) {
-      addToUndoStack();
+      addToUndoStack(rows);
       const newRows = [...rows];
       const aboveIndentation = getIndentation(newRows[selectedRow - 1].content);
 
@@ -169,7 +170,7 @@ const TreeBuilder: React.FC = () => {
 
   const moveRowDown = () => {
     if (selectedRow < rows.length - 1) {
-      addToUndoStack();
+      addToUndoStack(rows);
       const newRows = [...rows];
       const belowIndentation = getIndentation(newRows[selectedRow + 1].content);
 
@@ -185,7 +186,7 @@ const TreeBuilder: React.FC = () => {
 
   const stepRowOut = () => {
     if (selectedRow > 0) {
-      addToUndoStack();
+      addToUndoStack(rows);
       const newRows = [...rows];
       const currentIndentation = getIndentation(newRows[selectedRow].content);
 
@@ -198,7 +199,7 @@ const TreeBuilder: React.FC = () => {
 
   const stepRowIn = () => {
     if (selectedRow > 0) {
-      addToUndoStack();
+      addToUndoStack(rows);
       const newRows = [...rows];
       const currentIndentation = getIndentation(newRows[selectedRow].content);
       const aboveRowIndentation = getIndentation(newRows[selectedRow - 1].content);
@@ -212,7 +213,7 @@ const TreeBuilder: React.FC = () => {
 
   const startRenaming = () => {
     if (selectedRow >= 0) {
-      addToUndoStack();
+      addToUndoStack(rows);
       setRenameValue(rows[selectedRow].content.trim());
       setIsRenaming(true);
     }
@@ -306,28 +307,6 @@ const TreeBuilder: React.FC = () => {
 
   const clearAllRows = () => {
     setRows([]);
-  };
-
-  const addToUndoStack = () => {
-    setUndoStack((prevUndoStack) => {
-      const newStack = [...prevUndoStack, JSON.stringify(rows)];
-
-      while (newStack.length > 10) {
-        newStack.shift();
-      }
-
-      return newStack;
-    });
-  };
-
-  const undo = () => {
-    if (undoStack.length > 0) {
-      const lastState = undoStack.pop();
-      if (lastState) {
-        setRows(JSON.parse(lastState));
-        setUndoStack([...undoStack]);
-      }
-    }
   };
 
   return (
