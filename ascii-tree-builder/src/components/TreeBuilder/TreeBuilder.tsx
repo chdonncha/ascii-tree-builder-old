@@ -296,6 +296,10 @@ const TreeBuilder: React.FC = () => {
     return currentIndentation <= prevIndentation;
   };
 
+  const clearAllRows = () => {
+    setRows([]);
+  };
+
   return (
     <div className="container">
       <div className="input-box">
@@ -335,6 +339,9 @@ const TreeBuilder: React.FC = () => {
           </Button>
           <Button variant="contained" className="button-style" disabled={selectedRow < 0} onClick={startRenaming}>
             Rename
+          </Button>
+          <Button variant="contained" color="error" className="button-style" onClick={clearAllRows}>
+            Clear
           </Button>
         </div>
         <ul className="input-list">
