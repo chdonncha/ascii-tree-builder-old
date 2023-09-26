@@ -6,6 +6,7 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { useUndoStack } from '../hooks/useUndoStack';
 import { FileFolderActions } from './FileFolderActions';
 import { MovementActions } from './MovementActions';
+import { EditActions } from './EditActions';
 
 const TreeBuilder: React.FC = () => {
   const [rows, setRows] = useState<{ content: string; isSelected: boolean; type: 'file' | 'folder' }[]>([
@@ -59,54 +60,54 @@ const TreeBuilder: React.FC = () => {
     };
   }, []);
 
-  const deleteRow = () => {
-    if (selectedRow === -1) return; // If no row is selected, do nothing
-
-    const newRows = [...rows];
-
-    // Identify the children to delete based on indentation
-    const currentIndentation = getIndentation(newRows[selectedRow].content);
-
-    let lastIndexToDelete = selectedRow;
-    for (let i = selectedRow + 1; i < newRows.length; i++) {
-      if (getIndentation(newRows[i].content) > currentIndentation) {
-        lastIndexToDelete = i;
-      } else {
-        break;
-      }
-    }
-
-    // Delete the selected row and its children
-    newRows.splice(selectedRow, lastIndexToDelete - selectedRow + 1);
-
-    // Adjust the selected row after deletion
-    let newRowToSelect = -1;
-
-    // If it wasn't the first row, select the previous row
-    if (selectedRow > 0) {
-      newRowToSelect = selectedRow - 1;
-    }
-    // If it was the first row and there are still rows available, select the next row
-    else if (selectedRow === 0 && newRows.length > 0) {
-      newRowToSelect = 0;
-    }
-
-    setRows(newRows);
-    setSelectedRow(newRowToSelect);
-  };
+  // const deleteRow = () => {
+  //   if (selectedRow === -1) return; // If no row is selected, do nothing
+  //
+  //   const newRows = [...rows];
+  //
+  //   // Identify the children to delete based on indentation
+  //   const currentIndentation = getIndentation(newRows[selectedRow].content);
+  //
+  //   let lastIndexToDelete = selectedRow;
+  //   for (let i = selectedRow + 1; i < newRows.length; i++) {
+  //     if (getIndentation(newRows[i].content) > currentIndentation) {
+  //       lastIndexToDelete = i;
+  //     } else {
+  //       break;
+  //     }
+  //   }
+  //
+  //   // Delete the selected row and its children
+  //   newRows.splice(selectedRow, lastIndexToDelete - selectedRow + 1);
+  //
+  //   // Adjust the selected row after deletion
+  //   let newRowToSelect = -1;
+  //
+  //   // If it wasn't the first row, select the previous row
+  //   if (selectedRow > 0) {
+  //     newRowToSelect = selectedRow - 1;
+  //   }
+  //   // If it was the first row and there are still rows available, select the next row
+  //   else if (selectedRow === 0 && newRows.length > 0) {
+  //     newRowToSelect = 0;
+  //   }
+  //
+  //   setRows(newRows);
+  //   setSelectedRow(newRowToSelect);
+  // };
 
   const getIndentation = (str: string): number => {
     const match = str.match(/^ */);
     return match ? match[0].length : 0;
   };
 
-  const startRenaming = () => {
-    if (selectedRow >= 0) {
-      addToUndoStack(rows);
-      setRenameValue(rows[selectedRow].content.trim());
-      setIsRenaming(true);
-    }
-  };
+  // const startRenaming = () => {
+  //   if (selectedRow >= 0) {
+  //     addToUndoStack(rows);
+  //     setRenameValue(rows[selectedRow].content.trim());
+  //     setIsRenaming(true);
+  //   }
+  // };
 
   const handleRenameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRenameValue(e.target.value);
@@ -203,9 +204,6 @@ const TreeBuilder: React.FC = () => {
       <div className="input-box">
         <div className="button-row">
           <FileFolderActions rows={rows} setRows={setRows} selectedRow={selectedRow} addToUndoStack={addToUndoStack} />
-          <Button variant="contained" className="button-style" disabled={selectedRow < 0} onClick={deleteRow}>
-            Delete
-          </Button>
         </div>
         <div className="button-row">
           <MovementActions
@@ -217,15 +215,19 @@ const TreeBuilder: React.FC = () => {
             addToUndoStack={addToUndoStack}
             canIndentFurther={canIndentFurther}
           />
-          <Button variant="contained" className="button-style" disabled={selectedRow < 0} onClick={startRenaming}>
-            Rename
-          </Button>
-          <Button variant="contained" color="error" className="button-style" onClick={clearAllRows}>
-            Clear
-          </Button>
-          <Button variant="contained" className="button-style" onClick={undo}>
-            Undo
-          </Button>
+        </div>
+        <div className="button-row">
+          <EditActions
+            rows={rows}
+            selectedRow={selectedRow}
+            setRows={setRows}
+            setSelectedRow={setSelectedRow}
+            getIndentation={getIndentation}
+            addToUndoStack={addToUndoStack}
+            setRenameValue={setRenameValue}
+            setIsRenaming={setIsRenaming}
+            undo={undo}
+          />
         </div>
         <ul className="input-list">
           {rows.map((row, index) => (
@@ -264,6 +266,7 @@ const TreeBuilder: React.FC = () => {
         </ul>
       </div>
       <div className="output-box space-left">
+        <div className="button-row"></div>
         <div className="button-row"></div>
         <div className="button-row">
           <Button variant="contained" className="button-style" onClick={copyToClipboard}>
