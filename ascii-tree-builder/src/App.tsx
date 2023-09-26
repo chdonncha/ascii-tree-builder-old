@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.scss';
-import TreeBuilder from './components/TreeBuilder/TreeBuilder';
+import TreeBuilder from './components/TreeBuilder';
 
 function App() {
   return (
