@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './TreeBuilder.scss';
 import { Button, Snackbar, IconButton } from '@mui/material';
-import FolderIcon from '@mui/icons-material/Folder';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { useUndoStack } from '../hooks/useUndoStack';
 import { FileFolderActions } from './FileFolderActions';
 import { MovementActions } from './MovementActions';
 import { EditActions } from './EditActions';
+import { TreeItem } from './TreeItem';
 
 const TreeBuilder: React.FC = () => {
   const [rows, setRows] = useState<{ content: string; isSelected: boolean; type: 'file' | 'folder' }[]>([
@@ -151,10 +150,6 @@ const TreeBuilder: React.FC = () => {
     return currentIndentation <= prevIndentation;
   };
 
-  const clearAllRows = () => {
-    setRows([]);
-  };
-
   return (
     <div className="container">
       <div className="input-box">
@@ -187,37 +182,24 @@ const TreeBuilder: React.FC = () => {
         </div>
         <ul className="input-list">
           {rows.map((row, index) => (
-            <li
+            <TreeItem
               key={index}
-              contentEditable={false}
-              className={index === selectedRow ? 'highlighted' : ''}
-              onClick={() => {
+              row={row}
+              index={index}
+              isRenaming={isRenaming}
+              renameValue={renameValue}
+              handleRenameChange={handleRenameChange}
+              submitRename={submitRename}
+              setSelectedRow={(idx) => {
                 if (!isRenaming) {
-                  const newRows = rows.map((r, idx) => ({
+                  const newRows = rows.map((r, i) => ({
                     ...r,
-                    isSelected: idx === index,
+                    isSelected: i === idx,
                   }));
                   setRows(newRows);
-                  setSelectedRow(index);
                 }
               }}
-              style={{ marginLeft: `${(row.content.match(/^ */) || [''])[0].length * 10}px` }}
-            >
-              {row.type === 'folder' ? <FolderIcon /> : <InsertDriveFileIcon />}
-              {isRenaming && row.isSelected ? (
-                <input
-                  value={renameValue}
-                  onChange={handleRenameChange}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') submitRename(e);
-                  }}
-                  onBlur={submitRename}
-                  autoFocus
-                />
-              ) : (
-                row.content.trim()
-              )}
-            </li>
+            />
           ))}
         </ul>
       </div>
