@@ -190,13 +190,14 @@ const TreeBuilder: React.FC = () => {
               renameValue={renameValue}
               handleRenameChange={handleRenameChange}
               submitRename={submitRename}
-              setSelectedRow={(idx) => {
+              setSelectedRow={(selectedRowIndex) => {
                 if (!isRenaming) {
                   const newRows = rows.map((r, i) => ({
                     ...r,
-                    isSelected: i === idx,
+                    isSelected: i === selectedRowIndex,
                   }));
                   setRows(newRows);
+                  setSelectedRow(selectedRowIndex);
                 }
               }}
             />
