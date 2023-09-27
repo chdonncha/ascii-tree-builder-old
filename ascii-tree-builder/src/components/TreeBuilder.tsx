@@ -6,34 +6,16 @@ import { FileFolderActions } from './FileFolderActions';
 import { MovementActions } from './MovementActions';
 import { EditActions } from './EditActions';
 import { TreeItem } from './TreeItem';
+import { SAMPLE_TREE_DATA } from '../utils/sampleTreeData';
+
+export interface Row {
+  content: string;
+  isSelected: boolean;
+  type: 'file' | 'folder';
+}
 
 const TreeBuilder: React.FC = () => {
-  const [rows, setRows] = useState<{ content: string; isSelected: boolean; type: 'file' | 'folder' }[]>([
-    { content: 'Root/', isSelected: false, type: 'folder' },
-    { content: '  Documents/', isSelected: false, type: 'folder' },
-    { content: '    Reports/', isSelected: false, type: 'folder' },
-    { content: '      Monthly_Report.txt', isSelected: false, type: 'file' },
-    { content: '      Annual_Report.txt', isSelected: false, type: 'file' },
-    { content: '    Invoices/', isSelected: false, type: 'folder' },
-    { content: '  Media/', isSelected: false, type: 'folder' },
-    { content: '    Images/', isSelected: false, type: 'folder' },
-    { content: '      Profile_Picture.jpg', isSelected: false, type: 'file' },
-    { content: '      Banner.jpg', isSelected: false, type: 'file' },
-    { content: '    Videos/', isSelected: false, type: 'folder' },
-    { content: '      Intro_Video.mp4', isSelected: false, type: 'file' },
-    { content: '  Code/', isSelected: false, type: 'folder' },
-    { content: '    Laravel/', isSelected: false, type: 'folder' },
-    { content: '      web.php', isSelected: false, type: 'file' },
-    { content: '      api.php', isSelected: false, type: 'file' },
-    { content: '    ReactJS/', isSelected: false, type: 'folder' },
-    { content: '      App.tsx', isSelected: false, type: 'file' },
-    { content: '      index.tsx', isSelected: false, type: 'file' },
-    { content: '  Games/', isSelected: false, type: 'folder' },
-    { content: '    Retro/', isSelected: false, type: 'folder' },
-    { content: '      Doom', isSelected: false, type: 'file' },
-    { content: '      Quake', isSelected: false, type: 'file' },
-  ]);
-
+  const [rows, setRows] = useState<Row[]>(SAMPLE_TREE_DATA);
   const [selectedRow, setSelectedRow] = useState<number>(-1);
   const [asciiRepresentation, setAsciiRepresentation] = useState<string[]>([]);
   const [isRenaming, setIsRenaming] = useState(false);
