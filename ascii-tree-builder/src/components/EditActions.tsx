@@ -11,6 +11,7 @@ type EditActionsProps = {
   setRenameValue: (value: string) => void;
   setIsRenaming: (isRenaming: boolean) => void;
   undo: () => void;
+  redo: () => void;
 };
 
 export const EditActions: React.FC<EditActionsProps> = ({
@@ -23,6 +24,7 @@ export const EditActions: React.FC<EditActionsProps> = ({
   setRenameValue,
   setIsRenaming,
   undo,
+  redo,
 }) => {
   const deleteRow = () => {
     if (selectedRow === -1) return; // If no row is selected, do nothing
@@ -85,6 +87,9 @@ export const EditActions: React.FC<EditActionsProps> = ({
       </Button>
       <Button variant="contained" className="button-style" onClick={undo}>
         Undo
+      </Button>
+      <Button variant="contained" className="button-style" onClick={redo}>
+        Redo
       </Button>
     </>
   );

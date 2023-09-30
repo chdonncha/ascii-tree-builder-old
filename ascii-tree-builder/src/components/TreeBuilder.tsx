@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './TreeBuilder.scss';
 import { Button, Snackbar, IconButton } from '@mui/material';
-import { useUndoStack } from '../hooks/useUndoStack';
+import { useUndoRedoStack } from '../hooks/useUndoRedoStack';
 import { FileFolderActions } from './FileFolderActions';
 import { MovementActions } from './MovementActions';
 import { EditActions } from './EditActions';
@@ -22,7 +22,7 @@ const TreeBuilder: React.FC = () => {
   const [renameValue, setRenameValue] = useState('');
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const { addToUndoStack, undo } = useUndoStack(rows, setRows);
+  const { addToUndoStack, undo, redo } = useUndoRedoStack(rows, setRows);
 
   useEffect(() => {
     generateAsciiRepresentation();
@@ -160,6 +160,7 @@ const TreeBuilder: React.FC = () => {
             setRenameValue={setRenameValue}
             setIsRenaming={setIsRenaming}
             undo={undo}
+            redo={redo}
           />
         </div>
         <ul className="input-list">
