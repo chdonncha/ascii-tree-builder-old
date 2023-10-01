@@ -54,7 +54,7 @@ const parseTree = (text: string): TreeNode[] => {
 const rowsFromTreeNodes = (nodes: TreeNode[], depth: number = 0): Row[] => {
   let rows: Row[] = [];
   nodes.forEach((node) => {
-    const prefixSpaces = '    '.repeat(depth);
+    const prefixSpaces = '  '.repeat(depth);
 
     rows.push({
       content: prefixSpaces + node.name,
