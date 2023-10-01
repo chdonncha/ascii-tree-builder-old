@@ -4,6 +4,7 @@ import { Button, Snackbar, IconButton } from '@mui/material';
 import { useUndoRedoStack } from '../hooks/useUndoRedoStack';
 import { FileFolderActions } from './FileFolderActions';
 import { MovementActions } from './MovementActions';
+import { ImportActions } from './ImportActions';
 import { EditActions } from './EditActions';
 import { TreeItem } from './TreeItem';
 import { SAMPLE_TREE_DATA } from '../utils/sampleTreeData';
@@ -23,6 +24,7 @@ const TreeBuilder: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const { addToUndoStack, undo, redo } = useUndoRedoStack(rows, setRows);
+  const [inputValue, setInputValue] = useState('');
 
   useEffect(() => {
     generateAsciiRepresentation();
@@ -132,11 +134,16 @@ const TreeBuilder: React.FC = () => {
     return currentIndentation <= prevIndentation;
   };
 
+  const handleImportedData = (parsedData: Row[]) => {
+    setRows((prevRows) => [...prevRows, ...parsedData]);
+  };
+
   return (
     <div className="container">
       <div className="input-box">
         <div className="button-row">
           <FileFolderActions rows={rows} setRows={setRows} selectedRow={selectedRow} addToUndoStack={addToUndoStack} />
+          <ImportActions onImport={handleImportedData} />
         </div>
         <div className="button-row">
           <MovementActions

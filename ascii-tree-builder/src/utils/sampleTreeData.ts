@@ -1,4 +1,4 @@
-import { Row } from '../components/TreeBuilder'; // Replace with the actual relative path to your TreeBuilder component
+import { Row } from '../components/TreeBuilder';
 
 export const SAMPLE_TREE_DATA: Row[] = [
   { content: 'Root/', isSelected: false, type: 'folder' },
