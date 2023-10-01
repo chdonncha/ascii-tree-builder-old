@@ -1,18 +1,37 @@
 .App {
   text-align: center;
+  background-color: #282c34;
+  color: white;
+}
+
+body {
+  background-color: #282c34;
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
   color: white;
+}
+
+.instructions-container {
+  max-width: 1200px;
+  margin: 1rem auto;
+  text-align: left;
+  padding: 0 1rem;
 }
 
 .App-link {
   color: #61dafb;
+}
+
+.tree-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+}
+
+.instructions-container li {
+  list-style-type: none;
+  padding-left: 0;
+  margin-left: 0;
 }
