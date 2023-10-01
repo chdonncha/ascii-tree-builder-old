@@ -9,7 +9,7 @@ function App() {
         <h3>ASCII Tree Builder</h3>
       </header>
       <div className="instructions-container">
-        <strong>Tree Builder Instructions:</strong>
+        <strong>Instructions:</strong>
         <ul>
           <li>
             <strong>Manipulating Structure:</strong> Use the arrow buttons (↑, ↓, ←, →) to adjust the position and
