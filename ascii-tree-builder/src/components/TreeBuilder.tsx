@@ -138,6 +138,26 @@ const TreeBuilder: React.FC = () => {
     setRows((prevRows) => [...prevRows, ...parsedData]);
   };
 
+  const generatePrefix = (index: number): string => {
+    const currentIndentation = getIndentation(rows[index].content);
+
+    // Handle root node
+    if (index === 0) {
+      return '';
+    }
+
+    const isLastAtThisLevel = isLastInBranch(index);
+    let prefix = '';
+
+    for (let i = 0; i < currentIndentation / 2; i++) {
+      prefix += '│   ';
+    }
+
+    prefix += isLastAtThisLevel ? '└── ' : '├── ';
+
+    return prefix;
+  };
+
   return (
     <div className="container">
       <div className="input-box">
@@ -180,6 +200,7 @@ const TreeBuilder: React.FC = () => {
               renameValue={renameValue}
               handleRenameChange={handleRenameChange}
               submitRename={submitRename}
+              prefix={generatePrefix(index)}
               setSelectedRow={(selectedRowIndex) => {
                 if (!isRenaming) {
                   const newRows = rows.map((r, i) => ({

@@ -1,5 +1,3 @@
-// TreeItem.tsx
-
 import React from 'react';
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -12,6 +10,7 @@ interface TreeItemProps {
   handleRenameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   submitRename: (e?: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => void;
   setSelectedRow: (index: number) => void;
+  prefix: string; // The ASCII prefix representation for this item
 }
 
 export const TreeItem: React.FC<TreeItemProps> = ({
@@ -22,6 +21,7 @@ export const TreeItem: React.FC<TreeItemProps> = ({
   handleRenameChange,
   submitRename,
   setSelectedRow,
+  prefix,
 }) => {
   return (
     <li
@@ -33,8 +33,8 @@ export const TreeItem: React.FC<TreeItemProps> = ({
           setSelectedRow(index);
         }
       }}
-      style={{ marginLeft: `${(row.content.match(/^ */) || [''])[0].length * 10}px` }}
     >
+      <span style={{ fontFamily: 'monospace', whiteSpace: 'pre' }}>{prefix}</span>
       {row.type === 'folder' ? <FolderIcon /> : <InsertDriveFileIcon />}
       {isRenaming && row.isSelected ? (
         <input
