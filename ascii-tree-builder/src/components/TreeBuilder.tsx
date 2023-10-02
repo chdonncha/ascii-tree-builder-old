@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './TreeBuilder.scss';
 import { Button, Snackbar, IconButton } from '@mui/material';
 import { useUndoRedoStack } from '../hooks/useUndoRedoStack';
+import { useClickOutside } from '../hooks/useClickOutside';
 import { FileFolderActions } from './FileFolderActions';
 import { MovementActions } from './MovementActions';
 import { ImportActions } from './ImportActions';
@@ -30,18 +31,7 @@ const TreeBuilder: React.FC = () => {
     generateAsciiRepresentation();
   }, [rows]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setSelectedRow(-1);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  useClickOutside(containerRef, () => setSelectedRow(-1));
 
   const getIndentation = (str: string): number => {
     const match = str.match(/^ */);
