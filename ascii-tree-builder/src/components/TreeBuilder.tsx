@@ -9,6 +9,7 @@ import { ImportActions } from './ImportActions';
 import { EditActions } from './EditActions';
 import { TreeItem } from './TreeItem';
 import { SAMPLE_TREE_DATA } from '../utils/sampleTreeData';
+import { getIndentation, canNodeIndentFurther, generateAsciiPrefixForNode } from '../utils/treeUtils';
 
 export interface Row {
   content: string;
@@ -32,11 +33,6 @@ const TreeBuilder: React.FC = () => {
   }, [rows]);
 
   useClickOutside(containerRef, () => setSelectedRow(-1));
-
-  const getIndentation = (str: string): number => {
-    const match = str.match(/^ */);
-    return match ? match[0].length : 0;
-  };
 
   const handleRenameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRenameValue(e.target.value);
@@ -69,88 +65,15 @@ const TreeBuilder: React.FC = () => {
     const asciiRows: string[] = [];
 
     rows.forEach((row, index) => {
-      const prefix = generateAsciiPrefixForNode(index);
+      const prefix = generateAsciiPrefixForNode(index, rows);
       asciiRows.push(prefix + row.content.trim());
     });
 
     setAsciiRepresentation(asciiRows);
   };
 
-  const isLastInBranch = (index: number): boolean => {
-    const currentIndentation = getIndentation(rows[index].content);
-
-    for (let i = index + 1; i < rows.length; i++) {
-      const nextIndentation = getIndentation(rows[i].content);
-
-      if (nextIndentation === currentIndentation) {
-        return false;
-      }
-
-      if (nextIndentation < currentIndentation) {
-        return true;
-      }
-    }
-
-    return true;
-  };
-
-  const canNodeIndentFurther = (currentIndex: number): boolean => {
-    if (currentIndex === 0) return false;
-    const currentIndentation = getIndentation(rows[currentIndex].content);
-    const prevIndentation = getIndentation(rows[currentIndex - 1].content);
-    return currentIndentation <= prevIndentation;
-  };
-
   const handleImportedData = (parsedData: Row[]) => {
     setRows((prevRows) => [...prevRows, ...parsedData]);
-  };
-
-  const generateAsciiPrefixForNode = (index: number): string => {
-    const currentIndentation = getIndentation(rows[index].content);
-
-    // Special case for root node
-    if (index === 0) {
-      return '└── ';
-    }
-
-    let prefix = '';
-
-    for (let i = 0; i < currentIndentation / 2; i++) {
-      // Check if the current level is the last in its branch
-      if (isLastInBranchAtLevel(index, i * 2)) {
-        prefix += '    '; // Four spaces
-      } else {
-        prefix += '│   ';
-      }
-    }
-
-    // Check if the item itself is the last in its branch
-    const isLastAtThisLevel = isLastInBranch(index);
-    prefix += isLastAtThisLevel ? '└── ' : '├── ';
-
-    return prefix;
-  };
-
-  const isLastInBranchAtLevel = (index: number, level: number): boolean => {
-    const currentIndentation = getIndentation(rows[index].content);
-
-    if (level >= currentIndentation) {
-      return isLastInBranch(index);
-    }
-
-    for (let i = index + 1; i < rows.length; i++) {
-      const nextIndentation = getIndentation(rows[i].content);
-
-      if (nextIndentation === level) {
-        return false;
-      }
-
-      if (nextIndentation < level) {
-        return true;
-      }
-    }
-
-    return true;
   };
 
   return (
@@ -168,7 +91,7 @@ const TreeBuilder: React.FC = () => {
             setSelectedRow={setSelectedRow}
             getIndentation={getIndentation}
             addToUndoStack={addToUndoStack}
-            canNodeIndentFurther={canNodeIndentFurther}
+            canNodeIndentFurther={(selectedRow) => canNodeIndentFurther(selectedRow, rows)}
           />
         </div>
         <div className="button-row">
@@ -195,7 +118,7 @@ const TreeBuilder: React.FC = () => {
               renameValue={renameValue}
               handleRenameChange={handleRenameChange}
               submitRename={submitRename}
-              prefix={generateAsciiPrefixForNode(index)}
+              prefix={generateAsciiPrefixForNode(index, rows)}
               setSelectedRow={(selectedRowIndex) => {
                 if (!isRenaming) {
                   const newRows = rows.map((r, i) => ({
