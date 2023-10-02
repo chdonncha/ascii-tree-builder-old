@@ -35,9 +35,14 @@ export const TreeItem: React.FC<TreeItemProps> = ({
       }}
     >
       <span style={{ fontFamily: 'monospace', whiteSpace: 'pre' }}>{prefix}</span>
-      {row.type === 'folder' ? <FolderIcon /> : <InsertDriveFileIcon />}
+      {row.type === 'folder' ? (
+        <FolderIcon style={{ verticalAlign: 'middle' }} />
+      ) : (
+        <InsertDriveFileIcon style={{ verticalAlign: 'middle' }} />
+      )}
       {isRenaming && row.isSelected ? (
         <input
+          style={{ verticalAlign: 'middle' }}
           value={renameValue}
           onChange={handleRenameChange}
           onKeyDown={(e) => {
@@ -47,7 +52,7 @@ export const TreeItem: React.FC<TreeItemProps> = ({
           autoFocus
         />
       ) : (
-        row.content.trim()
+        <span style={{ verticalAlign: 'middle' }}>{row.content.trim()}</span>
       )}
     </li>
   );
