@@ -77,32 +77,9 @@ const TreeBuilder: React.FC = () => {
 
   const generateAsciiRepresentation = () => {
     const asciiRows: string[] = [];
-    const linkStack: boolean[] = [];
 
     rows.forEach((row, index) => {
-      const indentation = getIndentation(row.content);
-
-      const nextRowMatch = rows[index + 1]?.content.match(/^ */);
-      const nextRowIndentation = nextRowMatch ? nextRowMatch[0].length : 0;
-
-      const isLastAtThisLevel = isLastInBranch(index);
-
-      let prefix = '';
-
-      for (let i = 0; i < indentation / 2; i++) {
-        prefix += linkStack[i] ? '│   ' : '    ';
-      }
-
-      prefix += isLastAtThisLevel ? '└── ' : '├── ';
-
-      linkStack[indentation / 2] = !isLastAtThisLevel;
-
-      if (nextRowIndentation < indentation) {
-        for (let j = indentation / 2; j >= nextRowIndentation / 2; j--) {
-          linkStack[j] = false;
-        }
-      }
-
+      const prefix = generateAsciiPrefixForNode(index);
       asciiRows.push(prefix + row.content.trim());
     });
 
@@ -127,7 +104,7 @@ const TreeBuilder: React.FC = () => {
     return true;
   };
 
-  const canIndentFurther = (currentIndex: number): boolean => {
+  const canNodeIndentFurther = (currentIndex: number): boolean => {
     if (currentIndex === 0) return false;
     const currentIndentation = getIndentation(rows[currentIndex].content);
     const prevIndentation = getIndentation(rows[currentIndex - 1].content);
@@ -138,7 +115,7 @@ const TreeBuilder: React.FC = () => {
     setRows((prevRows) => [...prevRows, ...parsedData]);
   };
 
-  const generatePrefix = (index: number): string => {
+  const generateAsciiPrefixForNode = (index: number): string => {
     const currentIndentation = getIndentation(rows[index].content);
 
     // Special case for root node
@@ -201,7 +178,7 @@ const TreeBuilder: React.FC = () => {
             setSelectedRow={setSelectedRow}
             getIndentation={getIndentation}
             addToUndoStack={addToUndoStack}
-            canIndentFurther={canIndentFurther}
+            canNodeIndentFurther={canNodeIndentFurther}
           />
         </div>
         <div className="button-row">
@@ -228,7 +205,7 @@ const TreeBuilder: React.FC = () => {
               renameValue={renameValue}
               handleRenameChange={handleRenameChange}
               submitRename={submitRename}
-              prefix={generatePrefix(index)}
+              prefix={generateAsciiPrefixForNode(index)}
               setSelectedRow={(selectedRowIndex) => {
                 if (!isRenaming) {
                   const newRows = rows.map((r, i) => ({

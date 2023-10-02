@@ -8,7 +8,7 @@ type MovementActionsProps = {
   setSelectedRow: (rowIndex: number) => void;
   getIndentation: (content: string) => number;
   addToUndoStack: (rows: Array<{ content: string; isSelected: boolean; type: 'file' | 'folder' }>) => void;
-  canIndentFurther: (selectedRow: number) => boolean;
+  canNodeIndentFurther: (selectedRow: number) => boolean;
 };
 
 export const MovementActions: React.FC<MovementActionsProps> = ({
@@ -18,15 +18,19 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
   setSelectedRow,
   getIndentation,
   addToUndoStack,
-  canIndentFurther,
+  canNodeIndentFurther,
 }) => {
   const moveRowUp = () => {
     if (selectedRow > 0) {
       addToUndoStack(rows);
       const newRows = [...rows];
       const aboveIndentation = getIndentation(newRows[selectedRow - 1].content);
+      const currentIndentation = getIndentation(newRows[selectedRow].content);
 
-      newRows[selectedRow].content = ' '.repeat(aboveIndentation) + newRows[selectedRow].content.trim();
+      // Ensure moved row has the same indentation as the row above
+      if (aboveIndentation !== currentIndentation) {
+        newRows[selectedRow].content = ' '.repeat(aboveIndentation) + newRows[selectedRow].content.trim();
+      }
 
       const temp = newRows[selectedRow];
       newRows[selectedRow] = newRows[selectedRow - 1];
@@ -41,8 +45,12 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
       addToUndoStack(rows);
       const newRows = [...rows];
       const belowIndentation = getIndentation(newRows[selectedRow + 1].content);
+      const currentIndentation = getIndentation(newRows[selectedRow].content);
 
-      newRows[selectedRow].content = ' '.repeat(belowIndentation) + newRows[selectedRow].content.trim();
+      // Ensure moved row has the same indentation as the row below
+      if (belowIndentation !== currentIndentation) {
+        newRows[selectedRow].content = ' '.repeat(belowIndentation) + newRows[selectedRow].content.trim();
+      }
 
       const temp = newRows[selectedRow];
       newRows[selectedRow] = newRows[selectedRow + 1];
@@ -53,15 +61,12 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
   };
 
   const stepRowOut = () => {
-    if (selectedRow > 0) {
-      addToUndoStack(rows);
-      const newRows = [...rows];
-      const currentIndentation = getIndentation(newRows[selectedRow].content);
-
-      if (currentIndentation > 0) {
-        newRows[selectedRow].content = ' '.repeat(currentIndentation - 2) + newRows[selectedRow].content.trim();
-        setRows(newRows);
-      }
+    addToUndoStack(rows);
+    const newRows = [...rows];
+    const currentIndentation = getIndentation(newRows[selectedRow].content);
+    if (currentIndentation > 0) {
+      newRows[selectedRow].content = ' '.repeat(currentIndentation - 2) + newRows[selectedRow].content.trim();
+      setRows(newRows);
     }
   };
 
@@ -71,7 +76,6 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
       const newRows = [...rows];
       const currentIndentation = getIndentation(newRows[selectedRow].content);
       const aboveRowIndentation = getIndentation(newRows[selectedRow - 1].content);
-
       if (currentIndentation <= aboveRowIndentation) {
         newRows[selectedRow].content = ' '.repeat(currentIndentation + 2) + newRows[selectedRow].content.trim();
         setRows(newRows);
@@ -90,7 +94,7 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
       <Button
         variant="contained"
         className="button-style"
-        disabled={selectedRow < 0 || getIndentation(rows[selectedRow].content) === 0}
+        disabled={selectedRow < 0 || (selectedRow === 0 && getIndentation(rows[selectedRow].content) === 0)}
         onClick={stepRowOut}
       >
         ←
@@ -98,7 +102,7 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
       <Button
         variant="contained"
         className="button-style"
-        disabled={selectedRow <= 0 || !canIndentFurther(selectedRow)}
+        disabled={selectedRow <= 0 || !canNodeIndentFurther(selectedRow)}
         onClick={stepRowIn}
       >
         →
