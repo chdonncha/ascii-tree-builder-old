@@ -141,21 +141,49 @@ const TreeBuilder: React.FC = () => {
   const generatePrefix = (index: number): string => {
     const currentIndentation = getIndentation(rows[index].content);
 
-    // Handle root node
+    // Special case for root node
     if (index === 0) {
-      return '';
+      return '└── ';
     }
 
-    const isLastAtThisLevel = isLastInBranch(index);
     let prefix = '';
 
     for (let i = 0; i < currentIndentation / 2; i++) {
-      prefix += '│   ';
+      // Check if the current level is the last in its branch
+      if (isLastInBranchAtLevel(index, i * 2)) {
+        prefix += '    '; // Four spaces
+      } else {
+        prefix += '│   ';
+      }
     }
 
+    // Check if the item itself is the last in its branch
+    const isLastAtThisLevel = isLastInBranch(index);
     prefix += isLastAtThisLevel ? '└── ' : '├── ';
 
     return prefix;
+  };
+
+  const isLastInBranchAtLevel = (index: number, level: number): boolean => {
+    const currentIndentation = getIndentation(rows[index].content);
+
+    if (level >= currentIndentation) {
+      return isLastInBranch(index);
+    }
+
+    for (let i = index + 1; i < rows.length; i++) {
+      const nextIndentation = getIndentation(rows[i].content);
+
+      if (nextIndentation === level) {
+        return false;
+      }
+
+      if (nextIndentation < level) {
+        return true;
+      }
+    }
+
+    return true;
   };
 
   return (
