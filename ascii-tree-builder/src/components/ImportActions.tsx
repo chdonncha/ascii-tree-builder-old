@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { Row } from './TreeBuilder';
+import { styled } from '@mui/system'; // Import styled from MUI
 
 interface ImportActionsProps {
   onImport: (parsedData: Row[]) => void;
@@ -11,6 +12,13 @@ interface TreeNode {
   type: 'file' | 'folder';
   children?: TreeNode[];
 }
+
+const CustomDialog = styled(Dialog)({
+  '.MuiPaper-root': {
+    width: '70%',
+    maxHeight: '90vh',
+  },
+});
 
 const determineType = (line: string): 'file' | 'folder' => {
   const trimmed = line.trim();
@@ -86,7 +94,7 @@ export const ImportActions: React.FC<ImportActionsProps> = ({ onImport }) => {
       <Button variant="contained" className="button-style" onClick={() => setDialogOpen(true)}>
         Import Tree
       </Button>
-      <Dialog open={isDialogOpen} onClose={() => setDialogOpen(false)} aria-labelledby="import-dialog-title">
+      <CustomDialog open={isDialogOpen} onClose={() => setDialogOpen(false)} aria-labelledby="import-dialog-title">
         <DialogTitle id="import-dialog-title">Import Tree Data</DialogTitle>
         <DialogContent>
           <TextField
@@ -97,7 +105,7 @@ export const ImportActions: React.FC<ImportActionsProps> = ({ onImport }) => {
             type="text"
             fullWidth
             multiline
-            rows={4}
+            rows={20}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
@@ -110,7 +118,7 @@ export const ImportActions: React.FC<ImportActionsProps> = ({ onImport }) => {
             Import
           </Button>
         </DialogActions>
-      </Dialog>
+      </CustomDialog>
     </>
   );
 };
