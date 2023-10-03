@@ -26,9 +26,7 @@ export const canNodeIndentFurther = (currentIndex: number, rows: any[]): boolean
 
 export const generateAsciiPrefixForNode = (index: number, rows: any[]): string => {
   const currentIndentation = getIndentation(rows[index].content);
-  if (index === 0) {
-    return '└── ';
-  }
+
   let prefix = '';
   for (let i = 0; i < currentIndentation / 2; i++) {
     if (isLastInBranchAtLevel(index, i * 2, rows)) {
