@@ -1,21 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 
 interface TreeItemProps {
   row: { content: string; isSelected: boolean; type: 'file' | 'folder' };
   index: number;
+  totalItems: number; // Total number of items in the list
   isRenaming: boolean;
   renameValue: string;
   handleRenameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   submitRename: (e?: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => void;
   setSelectedRow: (index: number) => void;
-  prefix: string; // The ASCII prefix representation for this item
+  prefix: string;
 }
 
 export const TreeItem: React.FC<TreeItemProps> = ({
   row,
   index,
+  totalItems,
   isRenaming,
   renameValue,
   handleRenameChange,
@@ -23,6 +25,27 @@ export const TreeItem: React.FC<TreeItemProps> = ({
   setSelectedRow,
   prefix,
 }) => {
+  useEffect(() => {
+    const handleArrowKeys = (e: KeyboardEvent) => {
+      if (row.isSelected) {
+        if (!e.ctrlKey) {
+          if (e.key === 'ArrowUp' && index > 0) {
+            setSelectedRow(index - 1);
+          } else if (e.key === 'ArrowDown' && index < totalItems - 1) {
+            setSelectedRow(index + 1);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleArrowKeys);
+
+    return () => {
+      // Cleanup the event listener
+      document.removeEventListener('keydown', handleArrowKeys);
+    };
+  }, [row.isSelected, index, setSelectedRow, totalItems]);
+
   return (
     <li
       key={index}

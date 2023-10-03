@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@mui/material';
 
 type MovementActionsProps = {
@@ -82,6 +82,40 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
       }
     }
   };
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (selectedRow < 0) return; // No actions if no row is selected
+
+      const isCtrlPressed = e.ctrlKey;
+
+      switch (e.key) {
+        case 'ArrowUp':
+          if (isCtrlPressed) {
+            moveRowUp();
+          }
+          break;
+        case 'ArrowDown':
+          if (isCtrlPressed) {
+            moveRowDown();
+          }
+          break;
+        case 'ArrowLeft':
+          stepRowOut();
+          break;
+        case 'ArrowRight':
+          stepRowIn();
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [selectedRow, moveRowUp, moveRowDown, stepRowOut, stepRowIn]);
 
   return (
     <>

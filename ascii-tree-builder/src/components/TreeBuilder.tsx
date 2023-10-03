@@ -119,6 +119,7 @@ const TreeBuilder: React.FC = () => {
               handleRenameChange={handleRenameChange}
               submitRename={submitRename}
               prefix={generateAsciiPrefixForNode(index, rows)}
+              totalItems={rows.length}
               setSelectedRow={(selectedRowIndex) => {
                 if (!isRenaming) {
                   const newRows = rows.map((r, i) => ({

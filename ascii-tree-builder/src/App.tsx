@@ -33,6 +33,17 @@ function App() {
           </li>
         </ul>
       </div>
+      <div className="instructions-container">
+        <strong>Hotkeys:</strong>
+        <ul>
+          <li>
+            <strong>Navigation:</strong> Use the ↑/↓ arrow keys to navigate through the items.
+          </li>
+          <li>
+            <strong>Move Items:</strong> Hold 'Ctrl' and use the ↑/↓ arrow keys to move items up or down.
+          </li>
+        </ul>
+      </div>
       <div className="tree-container">
         <TreeBuilder />
       </div>
