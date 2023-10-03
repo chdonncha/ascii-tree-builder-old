@@ -28,13 +28,13 @@ export const FileFolderActions: React.FC<FileFolderActionsProps> = ({ rows, setR
         }
 
         newRows.splice(positionToInsert, 0, {
-          content: ' '.repeat(indentation) + '* ' + newFileName,
+          content: ' '.repeat(indentation) + newFileName,
           isSelected: false,
           type: 'file',
         });
       } else {
         // Add to the bottom of the hierarchy
-        newRows.push({ content: '* ' + newFileName, isSelected: false, type: 'file' });
+        newRows.push({ content: newFileName, isSelected: false, type: 'file' });
       }
       setRows(newRows);
     }
@@ -42,8 +42,10 @@ export const FileFolderActions: React.FC<FileFolderActionsProps> = ({ rows, setR
 
   const addFolder = () => {
     addToUndoStack(rows);
-    const newFolderName = prompt('Enter the new folder name:');
+    let newFolderName = prompt('Enter the new folder name:');
     if (newFolderName) {
+      newFolderName = newFolderName.trim().replace(/\/+$/, '') + '/';
+
       const newRows = [...rows];
       if (selectedRow >= 0) {
         const match = rows[selectedRow]?.content.match(/^ */);
