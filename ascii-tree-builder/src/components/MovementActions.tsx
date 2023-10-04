@@ -23,19 +23,31 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
   const moveRowUp = () => {
     if (selectedRow > 0) {
       addToUndoStack(rows);
-      const newRows = [...rows];
-      const aboveIndentation = getIndentation(newRows[selectedRow - 1].content);
-      const currentIndentation = getIndentation(newRows[selectedRow].content);
 
-      // Ensure moved row has the same indentation as the row above
-      if (aboveIndentation !== currentIndentation) {
-        newRows[selectedRow].content = ' '.repeat(aboveIndentation) + newRows[selectedRow].content.trim();
+      // Find the end index of the block we want to move.
+      let endOfBlock = selectedRow;
+      while (
+        endOfBlock + 1 < rows.length &&
+        getIndentation(rows[endOfBlock + 1].content) > getIndentation(rows[selectedRow].content)
+      ) {
+        endOfBlock++;
       }
 
-      const temp = newRows[selectedRow];
-      newRows[selectedRow] = newRows[selectedRow - 1];
-      newRows[selectedRow - 1] = temp;
-      setSelectedRow(selectedRow - 1);
+      // Now, [selectedRow, endOfBlock] represents the block of rows to move up.
+      const blockToMove = rows.slice(selectedRow, endOfBlock + 1);
+
+      // Make sure we're not trying to insert inside another block
+      let targetRow = selectedRow - 1;
+      while (targetRow > 0 && getIndentation(rows[targetRow].content) > getIndentation(rows[targetRow - 1].content)) {
+        targetRow--;
+      }
+
+      // Remove the nodes from the current position and insert them at the new position.
+      const newRows = [...rows];
+      newRows.splice(selectedRow, blockToMove.length); // Remove nodes
+      newRows.splice(targetRow, 0, ...blockToMove); // Insert nodes above targetRow
+
+      setSelectedRow(targetRow);
       setRows(newRows);
     }
   };
@@ -64,8 +76,29 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
     addToUndoStack(rows);
     const newRows = [...rows];
     const currentIndentation = getIndentation(newRows[selectedRow].content);
+
+    // Make sure we're not trying to unindent a top-level item
     if (currentIndentation > 0) {
+      // Find all children of the current row that should move along with it
+      const childrenToMove = [];
+      let currentChildIndex = selectedRow + 1;
+      while (
+        currentChildIndex < newRows.length &&
+        getIndentation(newRows[currentChildIndex].content) > currentIndentation
+      ) {
+        childrenToMove.push(currentChildIndex);
+        currentChildIndex++;
+      }
+
+      // Update the indentation of the parent node
       newRows[selectedRow].content = ' '.repeat(currentIndentation - 2) + newRows[selectedRow].content.trim();
+
+      // Update the indentation of the children nodes, if any exist
+      for (let childIndex of childrenToMove) {
+        newRows[childIndex].content =
+          ' '.repeat(getIndentation(newRows[childIndex].content) - 2) + newRows[childIndex].content.trim();
+      }
+
       setRows(newRows);
     }
   };
