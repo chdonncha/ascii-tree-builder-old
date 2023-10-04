@@ -23,31 +23,19 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
   const moveRowUp = () => {
     if (selectedRow > 0) {
       addToUndoStack(rows);
-
-      // Find the end index of the block we want to move.
-      let endOfBlock = selectedRow;
-      while (
-        endOfBlock + 1 < rows.length &&
-        getIndentation(rows[endOfBlock + 1].content) > getIndentation(rows[selectedRow].content)
-      ) {
-        endOfBlock++;
-      }
-
-      // Now, [selectedRow, endOfBlock] represents the block of rows to move up.
-      const blockToMove = rows.slice(selectedRow, endOfBlock + 1);
-
-      // Make sure we're not trying to insert inside another block
-      let targetRow = selectedRow - 1;
-      while (targetRow > 0 && getIndentation(rows[targetRow].content) > getIndentation(rows[targetRow - 1].content)) {
-        targetRow--;
-      }
-
-      // Remove the nodes from the current position and insert them at the new position.
       const newRows = [...rows];
-      newRows.splice(selectedRow, blockToMove.length); // Remove nodes
-      newRows.splice(targetRow, 0, ...blockToMove); // Insert nodes above targetRow
+      const aboveIndentation = getIndentation(newRows[selectedRow - 1].content);
+      const currentIndentation = getIndentation(newRows[selectedRow].content);
 
-      setSelectedRow(targetRow);
+      // Ensure moved row has the same indentation as the row above
+      if (aboveIndentation !== currentIndentation) {
+        newRows[selectedRow].content = ' '.repeat(aboveIndentation) + newRows[selectedRow].content.trim();
+      }
+
+      const temp = newRows[selectedRow];
+      newRows[selectedRow] = newRows[selectedRow - 1];
+      newRows[selectedRow - 1] = temp;
+      setSelectedRow(selectedRow - 1);
       setRows(newRows);
     }
   };
