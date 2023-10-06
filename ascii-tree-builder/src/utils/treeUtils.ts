@@ -18,9 +18,15 @@ export const isLastInBranch = (index: number, rows: any[]): boolean => {
 };
 
 export const canNodeIndentFurther = (currentIndex: number, rows: any[]): boolean => {
+  // Can't indent the first item further.
   if (currentIndex === 0) return false;
+
   const currentIndentation = getIndentation(rows[currentIndex].content);
   const prevIndentation = getIndentation(rows[currentIndex - 1].content);
+
+  // Ensure we don't indent under a file
+  if (rows[currentIndex - 1].type === 'file' && currentIndentation === prevIndentation) return false;
+
   return currentIndentation <= prevIndentation;
 };
 

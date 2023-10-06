@@ -92,7 +92,7 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
   };
 
   const stepRowIn = () => {
-    if (selectedRow > 0) {
+    if (canNodeIndentFurther(selectedRow)) {
       addToUndoStack(rows);
       const newRows = [...rows];
       const currentIndentation = getIndentation(newRows[selectedRow].content);
@@ -104,34 +104,36 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
     }
   };
 
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (selectedRow < 0) return; // No actions if no row is selected
+  const handleKeyPress = (e: KeyboardEvent) => {
+    if (selectedRow < 0) return;
 
-      const isCtrlPressed = e.ctrlKey;
+    const isCtrlPressed = e.ctrlKey;
 
-      switch (e.key) {
-        case 'ArrowUp':
-          if (isCtrlPressed) {
-            moveRowUp();
-          }
-          break;
-        case 'ArrowDown':
-          if (isCtrlPressed) {
-            moveRowDown();
-          }
-          break;
-        case 'ArrowLeft':
-          stepRowOut();
-          break;
-        case 'ArrowRight':
+    switch (e.key) {
+      case 'ArrowUp':
+        if (isCtrlPressed) {
+          moveRowUp();
+        }
+        break;
+      case 'ArrowDown':
+        if (isCtrlPressed) {
+          moveRowDown();
+        }
+        break;
+      case 'ArrowLeft':
+        stepRowOut();
+        break;
+      case 'ArrowRight':
+        if (canNodeIndentFurther(selectedRow)) {
           stepRowIn();
-          break;
-        default:
-          break;
-      }
-    };
+        }
+        break;
+      default:
+        break;
+    }
+  };
 
+  useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
