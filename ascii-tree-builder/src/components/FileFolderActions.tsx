@@ -14,19 +14,13 @@ export const FileFolderActions: React.FC<FileFolderActionsProps> = ({ rows, setR
     if (newFileName) {
       const newRows = [...rows];
       if (selectedRow >= 0) {
+        // Get the indentation of the selected row.
         const match = rows[selectedRow]?.content.match(/^ */);
-        const indentation = match ? match[0].length + 2 : 0;
+        const indentation = match ? match[0].length : 0;
+
         let positionToInsert = selectedRow + 1;
 
-        for (let i = selectedRow + 1; i < rows.length; i++) {
-          const nextMatch = rows[i].content.match(/^ */);
-          const nextIndentation = nextMatch ? nextMatch[0].length : 0;
-          if (nextIndentation <= indentation) {
-            break;
-          }
-          positionToInsert = i + 1;
-        }
-
+        // Insert the new file right after the selected row.
         newRows.splice(positionToInsert, 0, {
           content: ' '.repeat(indentation) + newFileName,
           isSelected: false,
@@ -48,9 +42,14 @@ export const FileFolderActions: React.FC<FileFolderActionsProps> = ({ rows, setR
 
       const newRows = [...rows];
       if (selectedRow >= 0) {
+        // Get the indentation of the selected row.
         const match = rows[selectedRow]?.content.match(/^ */);
-        const indentation = match ? match[0].length + 2 : 0;
-        newRows.splice(selectedRow + 1, 0, {
+        const indentation = match ? match[0].length : 0;
+
+        let positionToInsert = selectedRow + 1;
+
+        // Insert the new folder right after the selected row.
+        newRows.splice(positionToInsert, 0, {
           content: ' '.repeat(indentation) + newFolderName,
           isSelected: false,
           type: 'folder',
