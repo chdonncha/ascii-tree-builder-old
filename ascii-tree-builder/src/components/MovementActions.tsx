@@ -24,17 +24,38 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
     if (selectedRow > 0) {
       addToUndoStack(rows);
       const newRows = [...rows];
-      const aboveIndentation = getIndentation(newRows[selectedRow - 1].content);
       const currentIndentation = getIndentation(newRows[selectedRow].content);
+      const aboveIndentation = getIndentation(newRows[selectedRow - 1].content);
 
-      // Ensure moved row has the same indentation as the row above
-      if (aboveIndentation !== currentIndentation) {
-        newRows[selectedRow].content = ' '.repeat(aboveIndentation) + newRows[selectedRow].content.trim();
+      // Detecting all children of the moving row
+      let childrenToMove = [];
+      let nextRow = selectedRow + 1;
+      while (nextRow < newRows.length && getIndentation(newRows[nextRow].content) > currentIndentation) {
+        childrenToMove.push(newRows[nextRow]);
+        nextRow++;
       }
 
-      const temp = newRows[selectedRow];
-      newRows[selectedRow] = newRows[selectedRow - 1];
-      newRows[selectedRow - 1] = temp;
+      // Calculating the new indentation
+      const newIndentation = aboveIndentation < currentIndentation ? aboveIndentation + 2 : aboveIndentation;
+
+      // Creating an array of the rows to be moved (current row and its children)
+      const movingRows = [
+        {
+          ...newRows[selectedRow],
+          content: ' '.repeat(newIndentation) + newRows[selectedRow].content.trim(),
+        },
+        ...childrenToMove.map((row) => ({
+          ...row,
+          content: ' '.repeat(getIndentation(row.content) + (newIndentation - currentIndentation)) + row.content.trim(),
+        })),
+      ];
+
+      // Removing the moving rows from the original array
+      newRows.splice(selectedRow, childrenToMove.length + 1);
+
+      // Inserting the rows at the new position
+      newRows.splice(selectedRow - 1, 0, ...movingRows);
+
       setSelectedRow(selectedRow - 1);
       setRows(newRows);
     }
