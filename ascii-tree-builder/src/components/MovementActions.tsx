@@ -108,6 +108,16 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
           ' '.repeat(getIndentation(newRows[childIndex].content) - 2) + newRows[childIndex].content.trim();
       }
 
+      // Check if the next item exists and is a file
+      if (selectedRow + 1 < newRows.length && newRows[selectedRow + 1].type === 'file') {
+        // Check if it has equal or greater indentation (would become a child)
+        if (getIndentation(newRows[selectedRow + 1].content) >= currentIndentation) {
+          // Adjust the indentation to be a sibling instead of a child
+          newRows[selectedRow + 1].content =
+            ' '.repeat(currentIndentation - 2) + newRows[selectedRow + 1].content.trim();
+        }
+      }
+
       setRows(newRows);
     }
   };
