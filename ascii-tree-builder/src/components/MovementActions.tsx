@@ -35,8 +35,8 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
         nextRow++;
       }
 
-      // Calculating the new indentation
-      const newIndentation = aboveIndentation < currentIndentation ? aboveIndentation + 2 : aboveIndentation;
+      // Set the newIndentation to be the same as aboveIndentation,
+      const newIndentation = aboveIndentation;
 
       // Creating an array of the rows to be moved (current row and its children)
       const movingRows = [
