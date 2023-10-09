@@ -65,18 +65,30 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
     if (selectedRow < rows.length - 1) {
       addToUndoStack(rows);
       const newRows = [...rows];
-      const belowIndentation = getIndentation(newRows[selectedRow + 1].content);
       const currentIndentation = getIndentation(newRows[selectedRow].content);
 
-      // Ensure moved row has the same indentation as the row below
-      if (belowIndentation !== currentIndentation) {
-        newRows[selectedRow].content = ' '.repeat(belowIndentation) + newRows[selectedRow].content.trim();
+      // Detecting all children of the moving row
+      let childrenToMove = [];
+      let nextRow = selectedRow + 1;
+      while (nextRow < newRows.length && getIndentation(newRows[nextRow].content) > currentIndentation) {
+        childrenToMove.push(newRows[nextRow]);
+        nextRow++;
       }
 
-      const temp = newRows[selectedRow];
-      newRows[selectedRow] = newRows[selectedRow + 1];
-      newRows[selectedRow + 1] = temp;
-      setSelectedRow(selectedRow + 1);
+      // Identify and extract the block that needs to move down, including the selected row and its children
+      const movingBlock = [newRows[selectedRow], ...childrenToMove];
+      newRows.splice(selectedRow, childrenToMove.length + 1);
+
+      // Find the position where the moving block should be inserted after the block below it
+      let insertionIndex = selectedRow + 1;
+      while (insertionIndex < newRows.length && getIndentation(newRows[insertionIndex].content) > currentIndentation) {
+        insertionIndex++;
+      }
+
+      // Inserting the moving block at the new position
+      newRows.splice(insertionIndex, 0, ...movingBlock);
+
+      setSelectedRow(insertionIndex);
       setRows(newRows);
     }
   };
