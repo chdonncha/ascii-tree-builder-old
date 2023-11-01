@@ -63,31 +63,40 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
 
   const moveRowDown = () => {
     if (selectedRow < rows.length - 1) {
-      addToUndoStack(rows);
       const newRows = [...rows];
       const currentIndentation = getIndentation(newRows[selectedRow].content);
 
       // Detecting all children of the moving row
-      let childrenToMove = [];
+      let childrenToMove: any[] = [];
       let nextRow = selectedRow + 1;
       while (nextRow < newRows.length && getIndentation(newRows[nextRow].content) > currentIndentation) {
         childrenToMove.push(newRows[nextRow]);
         nextRow++;
       }
 
-      // Identify and extract the block that needs to move down, including the selected row and its children
-      const movingBlock = [newRows[selectedRow], ...childrenToMove];
+      // Removing the selected row and its children from the array
+      const movingBlock: any[] = [newRows[selectedRow], ...childrenToMove];
       newRows.splice(selectedRow, childrenToMove.length + 1);
 
-      // Find the position where the moving block should be inserted after the block below it
+      // Determine where to insert the block
       let insertionIndex = selectedRow + 1;
       while (insertionIndex < newRows.length && getIndentation(newRows[insertionIndex].content) > currentIndentation) {
         insertionIndex++;
       }
 
-      // Inserting the moving block at the new position
+      // Insert the moving block at the new position
       newRows.splice(insertionIndex, 0, ...movingBlock);
 
+      // Adjust the indentation of the moved block if it's not at the root level
+      if (insertionIndex > 0 && getIndentation(newRows[insertionIndex - 1].content) === currentIndentation) {
+        const adjustIndentation = (content: string, amount: number) => ' '.repeat(getIndentation(content) + amount) + content.trim();
+        movingBlock[0].content = adjustIndentation(movingBlock[0].content, 2); // Increase by 2 spaces
+        for (let i = 1; i < movingBlock.length; i++) {
+          movingBlock[i].content = adjustIndentation(movingBlock[i].content, 2); // Increase by 2 spaces for children too
+        }
+      }
+
+      // Update the selectedRow index to reflect the new position of the moved row
       setSelectedRow(insertionIndex);
       setRows(newRows);
     }
