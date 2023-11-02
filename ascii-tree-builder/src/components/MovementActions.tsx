@@ -63,6 +63,7 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
 
   const moveRowDown = () => {
     if (selectedRow < rows.length - 1) {
+      addToUndoStack(rows);
       const newRows = [...rows];
       const currentIndentation = getIndentation(newRows[selectedRow].content);
 
