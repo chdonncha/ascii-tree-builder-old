@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import classNames from 'classnames';
 
 interface TreeItemProps {
   row: { content: string; isSelected: boolean; type: 'file' | 'folder' };
@@ -12,6 +13,7 @@ interface TreeItemProps {
   submitRename: (e?: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => void;
   setSelectedRow: (index: number) => void;
   prefix: string;
+  isChildSelected: boolean;
 }
 
 export const TreeItem: React.FC<TreeItemProps> = ({
@@ -24,6 +26,7 @@ export const TreeItem: React.FC<TreeItemProps> = ({
   submitRename,
   setSelectedRow,
   prefix,
+  isChildSelected,
 }) => {
   useEffect(() => {
     const handleArrowKeys = (e: KeyboardEvent) => {
@@ -46,17 +49,13 @@ export const TreeItem: React.FC<TreeItemProps> = ({
     };
   }, [row.isSelected, index, setSelectedRow, totalItems]);
 
+  const itemClassName = classNames({
+    highlighted: row.isSelected,
+    'child-highlighted': isChildSelected,
+  });
+
   return (
-    <li
-      key={index}
-      contentEditable={false}
-      className={row.isSelected ? 'highlighted' : ''}
-      onClick={() => {
-        if (!isRenaming) {
-          setSelectedRow(index);
-        }
-      }}
-    >
+    <li key={index} contentEditable={false} className={itemClassName} onClick={() => setSelectedRow(index)}>
       <span style={{ fontFamily: 'monospace', whiteSpace: 'pre' }}>{prefix}</span>
       {row.type === 'folder' ? (
         <FolderIcon style={{ verticalAlign: 'middle' }} />

@@ -26,7 +26,6 @@ const TreeBuilder: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const { addToUndoStack, undo, redo } = useUndoRedoStack(rows, setRows);
-  const [inputValue, setInputValue] = useState('');
 
   useEffect(() => {
     generateAsciiRepresentation();
@@ -38,15 +37,22 @@ const TreeBuilder: React.FC = () => {
     setRenameValue(e.target.value);
   };
 
-  const submitRename = (e?: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => {
-    if (e && 'key' in e && e.key !== 'Enter') return;
-
-    if (e) e.preventDefault();
-
-    const newRows = [...rows];
-    newRows[selectedRow].content = ' '.repeat(getIndentation(newRows[selectedRow].content)) + renameValue;
-    setRows(newRows);
-    setIsRenaming(false);
+  const submitRename = (e) => {
+    if (e && e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedRow >= 0 && selectedRow < rows.length) {
+        const newRows = [...rows];
+        const newName = renameValue.trim(); // Trim the input value
+        const indentation = ' '.repeat(getIndentation(newRows[selectedRow].content));
+        newRows[selectedRow] = {
+          ...newRows[selectedRow],
+          content: `${indentation}${newName}`,
+        };
+        setRows(newRows);
+        setIsRenaming(false);
+        setRenameValue(''); // Clear the input after rename
+      }
+    }
   };
 
   const copyToClipboard = () => {
@@ -74,6 +80,56 @@ const TreeBuilder: React.FC = () => {
 
   const handleImportedData = (parsedData: Row[]) => {
     setRows((prevRows) => [...prevRows, ...parsedData]);
+  };
+
+  const isChildOfSelectedRow = (rowIndex, selectedRowIndex, rows) => {
+    // Return false if no row is selected or the index is not greater than the selected row's index
+    if (selectedRowIndex === -1 || rowIndex <= selectedRowIndex) {
+      return false;
+    }
+
+    // Get the indentation level of the selected row
+    const selectedRowIndentation = getIndentation(rows[selectedRowIndex].content);
+
+    // Get the indentation level of the current row
+    const rowIndentation = getIndentation(rows[rowIndex].content);
+
+    // The current row is a child if it has greater indentation than the selected row
+    // and there is no row in between with the same or lesser indentation
+    for (let i = selectedRowIndex + 1; i <= rowIndex; i++) {
+      const middleRowIndentation = getIndentation(rows[i].content);
+      if (middleRowIndentation <= selectedRowIndentation) {
+        return false;
+      }
+    }
+    return rowIndentation > selectedRowIndentation;
+  };
+
+  const handleSetSelectedRow = (index) => {
+    if (!isRenaming) {
+      // Reset selection for all rows
+      const updatedRows = rows.map((row) => ({ ...row, isSelected: false }));
+
+      // Get the indentation level of the selected row
+      const selectedRowIndentation = getIndentation(rows[index].content);
+
+      // Select the clicked row
+      updatedRows[index].isSelected = true;
+
+      // Loop to find and select children
+      for (let i = index + 1; i < rows.length; i++) {
+        const rowIndentation = getIndentation(rows[i].content);
+        if (rowIndentation > selectedRowIndentation) {
+          updatedRows[i].isSelected = true;
+        } else {
+          // As soon as we find a row that is not more indented, we break out of the loop
+          break;
+        }
+      }
+
+      setRows(updatedRows);
+      setSelectedRow(index);
+    }
   };
 
   return (
@@ -109,29 +165,27 @@ const TreeBuilder: React.FC = () => {
           />
         </div>
         <ul className="input-list">
-          {rows.map((row, index) => (
-            <TreeItem
-              key={index}
-              row={row}
-              index={index}
-              isRenaming={isRenaming}
-              renameValue={renameValue}
-              handleRenameChange={handleRenameChange}
-              submitRename={submitRename}
-              prefix={generateAsciiPrefixForNode(index, rows)}
-              totalItems={rows.length}
-              setSelectedRow={(selectedRowIndex) => {
-                if (!isRenaming) {
-                  const newRows = rows.map((r, i) => ({
-                    ...r,
-                    isSelected: i === selectedRowIndex,
-                  }));
-                  setRows(newRows);
-                  setSelectedRow(selectedRowIndex);
-                }
-              }}
-            />
-          ))}
+          {rows.map((row, index) => {
+            const isSelected = index === selectedRow;
+            const isChildSelected = selectedRow >= 0 ? isChildOfSelectedRow(index, selectedRow, rows) : false;
+
+            // Make sure to return the TreeItem component
+            return (
+              <TreeItem
+                key={index}
+                row={row}
+                index={index}
+                isRenaming={isRenaming}
+                renameValue={renameValue}
+                handleRenameChange={handleRenameChange}
+                submitRename={submitRename}
+                prefix={generateAsciiPrefixForNode(index, rows)}
+                totalItems={rows.length}
+                isChildSelected={isChildSelected}
+                setSelectedRow={() => handleSetSelectedRow(index)}
+              />
+            );
+          })}
         </ul>
       </div>
       <div className="output-box space-left">
