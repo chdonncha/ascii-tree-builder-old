@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Button } from '@mui/material';
+import { isLastInBranch } from '../utils/treeUtils';
 
 type MovementActionsProps = {
   rows: Array<{ content: string; isSelected: boolean; type: 'file' | 'folder' }>;
@@ -64,38 +65,54 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
   const moveRowDown = () => {
     if (selectedRow < rows.length - 1) {
       addToUndoStack(rows);
-      const newRows = [...rows];
-      const currentIndentation = getIndentation(newRows[selectedRow].content);
+      let newRows = [...rows];
+      const currentRow = newRows[selectedRow];
+      const currentIndentation = getIndentation(currentRow.content);
 
       // Detecting all children of the moving row
-      let childrenToMove: any[] = [];
+      let childrenToMove = [];
       let nextRow = selectedRow + 1;
       while (nextRow < newRows.length && getIndentation(newRows[nextRow].content) > currentIndentation) {
         childrenToMove.push(newRows[nextRow]);
         nextRow++;
       }
 
-      // Removing the selected row and its children from the array
-      const movingBlock: any[] = [newRows[selectedRow], ...childrenToMove];
+      // Remove the block from the current position
       newRows.splice(selectedRow, childrenToMove.length + 1);
 
-      // Determine where to insert the block
-      let insertionIndex = selectedRow + 1;
+      // Determine the insertion point for the block of rows to move
+      let insertionIndex = selectedRow + 1; // Start looking right below the current row
       while (insertionIndex < newRows.length && getIndentation(newRows[insertionIndex].content) > currentIndentation) {
         insertionIndex++;
       }
 
-      // Insert the moving block at the new position
-      newRows.splice(insertionIndex, 0, ...movingBlock);
-
-      // Adjust the indentation of the moved block if it's not at the root level
-      if (insertionIndex > 0 && getIndentation(newRows[insertionIndex - 1].content) === currentIndentation) {
-        const adjustIndentation = (content: string, amount: number) => ' '.repeat(getIndentation(content) + amount) + content.trim();
-        movingBlock[0].content = adjustIndentation(movingBlock[0].content, 2); // Increase by 2 spaces
-        for (let i = 1; i < movingBlock.length; i++) {
-          movingBlock[i].content = adjustIndentation(movingBlock[i].content, 2); // Increase by 2 spaces for children too
+      // Check if we need to adjust indentation
+      if (insertionIndex < newRows.length) {
+        const targetRow = newRows[insertionIndex];
+        const targetIndentation = getIndentation(targetRow.content);
+        // If the target row is a folder with the same indentation, we move inside as a child
+        if (targetRow.type === 'folder' && targetIndentation === currentIndentation) {
+          // Increase indentation to become a child of the folder, but only if it's not the last item
+          if (!isLastInBranch(selectedRow, newRows)) {
+            currentRow.content = ' '.repeat(targetIndentation + 2) + currentRow.content.trim();
+            childrenToMove.forEach((child, index) => {
+              childrenToMove[index].content = ' '.repeat(getIndentation(child.content) + 2) + child.content.trim();
+            });
+          }
+        }
+        // If the target row is a folder with higher indentation but is not directly after the children,
+        // we should not become a child of it
+        else if (
+          targetRow.type === 'folder' &&
+          targetIndentation > currentIndentation &&
+          insertionIndex !== selectedRow + 1
+        ) {
+          insertionIndex--; // Move back one position to maintain the current indentation level
         }
       }
+
+      // Insert the block at the new position
+      newRows.splice(insertionIndex, 0, currentRow, ...childrenToMove);
 
       // Update the selectedRow index to reflect the new position of the moved row
       setSelectedRow(insertionIndex);
