@@ -14,6 +14,7 @@ import { getIndentation, canNodeIndentFurther, generateAsciiPrefixForNode } from
 export interface Row {
   content: string;
   isSelected: boolean;
+  isRenaming?: boolean;
   type: 'file' | 'folder';
 }
 
@@ -41,7 +42,7 @@ const TreeBuilder: React.FC = () => {
     if (e && e.key === 'Enter') {
       e.preventDefault();
       if (selectedRow >= 0 && selectedRow < rows.length) {
-        const newRows = [...rows];
+        const newRows = rows.map((row) => ({ ...row, isRenaming: false })); // Reset isRenaming for all rows
         const newName = renameValue.trim(); // Trim the input value
         const indentation = ' '.repeat(getIndentation(newRows[selectedRow].content));
         newRows[selectedRow] = {
@@ -108,21 +109,17 @@ const TreeBuilder: React.FC = () => {
   const handleSetSelectedRow = (index) => {
     if (!isRenaming) {
       // Reset selection for all rows
-      const updatedRows = rows.map((row) => ({ ...row, isSelected: false }));
+      const updatedRows = rows.map((row, index) => ({ ...row, isSelected: false }));
 
-      // Get the indentation level of the selected row
-      const selectedRowIndentation = getIndentation(rows[index].content);
-
-      // Select the clicked row
+      // Select the clicked row and its children
       updatedRows[index].isSelected = true;
 
-      // Loop to find and select children
+      const selectedRowIndentation = getIndentation(rows[index].content);
       for (let i = index + 1; i < rows.length; i++) {
         const rowIndentation = getIndentation(rows[i].content);
         if (rowIndentation > selectedRowIndentation) {
           updatedRows[i].isSelected = true;
         } else {
-          // As soon as we find a row that is not more indented, we break out of the loop
           break;
         }
       }

@@ -64,9 +64,14 @@ export const EditActions: React.FC<EditActionsProps> = ({
 
   const startRenaming = () => {
     if (selectedRow >= 0) {
-      addToUndoStack(rows);
+      const newRows = rows.map((row, index) => ({
+        ...row,
+        isRenaming: index === selectedRow, // Only the selected row should have isRenaming set to true
+      }));
+      addToUndoStack(newRows); // Save the current state to the undo stack
       setRenameValue(rows[selectedRow].content.trim());
       setIsRenaming(true);
+      setRows(newRows); // Update the rows with the new state
     }
   };
 

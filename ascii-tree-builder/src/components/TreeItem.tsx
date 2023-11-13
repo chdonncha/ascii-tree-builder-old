@@ -4,10 +4,15 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import classNames from 'classnames';
 
 interface TreeItemProps {
-  row: { content: string; isSelected: boolean; type: 'file' | 'folder' };
+  row: {
+    content: string;
+    isSelected: boolean;
+    type: 'file' | 'folder';
+    isRenaming?: boolean;
+  };
   index: number;
   totalItems: number; // Total number of items in the list
-  isRenaming: boolean;
+  isRenaming?: boolean;
   renameValue: string;
   handleRenameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   submitRename: (e?: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => void;
@@ -55,21 +60,19 @@ export const TreeItem: React.FC<TreeItemProps> = ({
   });
 
   return (
-    <li key={index} contentEditable={false} className={itemClassName} onClick={() => setSelectedRow(index)}>
+    <li key={index} className={itemClassName} onClick={() => setSelectedRow(index)}>
       <span style={{ fontFamily: 'monospace', whiteSpace: 'pre' }}>{prefix}</span>
       {row.type === 'folder' ? (
         <FolderIcon style={{ verticalAlign: 'middle' }} />
       ) : (
         <InsertDriveFileIcon style={{ verticalAlign: 'middle' }} />
       )}
-      {isRenaming && row.isSelected ? (
+      {row.isRenaming ? (
         <input
           style={{ verticalAlign: 'middle' }}
           value={renameValue}
           onChange={handleRenameChange}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') submitRename(e);
-          }}
+          onKeyDown={submitRename}
           onBlur={submitRename}
           autoFocus
         />
