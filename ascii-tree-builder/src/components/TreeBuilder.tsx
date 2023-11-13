@@ -12,10 +12,13 @@ import { SAMPLE_TREE_DATA } from '../utils/sampleTreeData';
 import { getIndentation, canNodeIndentFurther, generateAsciiPrefixForNode } from '../utils/treeUtils';
 
 export interface Row {
+  id: string;
+  parentId: string | null;
   content: string;
   isSelected: boolean;
   isRenaming?: boolean;
   type: 'file' | 'folder';
+  level: number;
 }
 
 const TreeBuilder: React.FC = () => {
@@ -44,7 +47,8 @@ const TreeBuilder: React.FC = () => {
       if (selectedRow >= 0 && selectedRow < rows.length) {
         const newRows = rows.map((row) => ({ ...row, isRenaming: false })); // Reset isRenaming for all rows
         const newName = renameValue.trim(); // Trim the input value
-        const indentation = ' '.repeat(getIndentation(newRows[selectedRow].content));
+        const level = rows[selectedRow].level;
+        const indentation = ' '.repeat(level * 2);
         newRows[selectedRow] = {
           ...newRows[selectedRow],
           content: `${indentation}${newName}`,
@@ -70,12 +74,10 @@ const TreeBuilder: React.FC = () => {
 
   const generateAsciiRepresentation = () => {
     const asciiRows: string[] = [];
-
     rows.forEach((row, index) => {
       const prefix = generateAsciiPrefixForNode(index, rows);
       asciiRows.push(prefix + row.content.trim());
     });
-
     setAsciiRepresentation(asciiRows);
   };
 
@@ -114,9 +116,9 @@ const TreeBuilder: React.FC = () => {
       // Select the clicked row and its children
       updatedRows[index].isSelected = true;
 
-      const selectedRowIndentation = getIndentation(rows[index].content);
+      const selectedRowIndentation = rows[index].level * 2;
       for (let i = index + 1; i < rows.length; i++) {
-        const rowIndentation = getIndentation(rows[i].content);
+        const rowIndentation = rows[i].level * 2;
         if (rowIndentation > selectedRowIndentation) {
           updatedRows[i].isSelected = true;
         } else {

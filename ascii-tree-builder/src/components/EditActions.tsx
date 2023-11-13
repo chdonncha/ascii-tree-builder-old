@@ -1,13 +1,14 @@
 import React from 'react';
 import { Button } from '@mui/material';
+import { Row } from './TreeBuilder';
 
 type EditActionsProps = {
-  rows: Array<{ content: string; isSelected: boolean; type: 'file' | 'folder' }>;
+  rows: Row[];
   selectedRow: number;
-  setRows: (rows: Array<{ content: string; isSelected: boolean; type: 'file' | 'folder' }>) => void;
+  setRows: React.Dispatch<React.SetStateAction<Row[]>>;
   setSelectedRow: (rowIndex: number) => void;
   getIndentation: (content: string) => number;
-  addToUndoStack: (rows: Array<{ content: string; isSelected: boolean; type: 'file' | 'folder' }>) => void;
+  addToUndoStack: (rows: Row[]) => void;
   setRenameValue: (value: string) => void;
   setIsRenaming: (isRenaming: boolean) => void;
   undo: () => void;

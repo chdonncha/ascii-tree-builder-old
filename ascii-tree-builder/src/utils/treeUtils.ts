@@ -1,16 +1,15 @@
-export const getIndentation = (str: string): number => {
-  const match = str.match(/^ */);
+export const getIndentation = (content: string): number => {
+  const match = content.match(/^ */);
   return match ? match[0].length : 0;
 };
 
 export const isLastInBranch = (index: number, rows: any[]): boolean => {
-  const currentIndentation = getIndentation(rows[index].content);
+  const currentLevel = rows[index].level;
   for (let i = index + 1; i < rows.length; i++) {
-    const nextIndentation = getIndentation(rows[i].content);
-    if (nextIndentation === currentIndentation) {
+    if (rows[i].level === currentLevel) {
       return false;
     }
-    if (nextIndentation < currentIndentation) {
+    if (rows[i].level < currentLevel) {
       return true;
     }
   }
@@ -21,42 +20,38 @@ export const canNodeIndentFurther = (currentIndex: number, rows: any[]): boolean
   // Can't indent the first item further.
   if (currentIndex === 0) return false;
 
-  const currentIndentation = getIndentation(rows[currentIndex].content);
-  const prevIndentation = getIndentation(rows[currentIndex - 1].content);
+  const currentLevel = rows[currentIndex].level;
+  const prevLevel = rows[currentIndex - 1].level;
 
   // Ensure we don't indent under a file
-  if (rows[currentIndex - 1].type === 'file' && currentIndentation === prevIndentation) return false;
+  if (rows[currentIndex - 1].type === 'file' && currentLevel === prevLevel) return false;
 
-  return currentIndentation <= prevIndentation;
+  return currentLevel <= prevLevel;
 };
 
 export const generateAsciiPrefixForNode = (index: number, rows: any[]): string => {
-  const currentIndentation = getIndentation(rows[index].content);
-
+  const level = rows[index].level;
   let prefix = '';
-  for (let i = 0; i < currentIndentation / 2; i++) {
-    if (isLastInBranchAtLevel(index, i * 2, rows)) {
-      prefix += '    '; // Four spaces
+  for (let i = 0; i < level; i++) {
+    // Add the appropriate prefix based on whether it's the last node in the branch at this level
+    if (isLastInBranchAtLevel(index, i, rows)) {
+      prefix += '    '; // Four spaces for last in branch at this level
     } else {
-      prefix += '│   ';
+      prefix += '│   '; // Pipe and three spaces otherwise
     }
   }
-  const isLastAtThisLevel = isLastInBranch(index, rows);
-  prefix += isLastAtThisLevel ? '└── ' : '├── ';
+
+  // Add the last branch prefix based on whether it is the last node at this level
+  prefix += isLastInBranch(index, rows) ? '└── ' : '├── ';
   return prefix;
 };
 
 export const isLastInBranchAtLevel = (index: number, level: number, rows: any[]): boolean => {
-  const currentIndentation = getIndentation(rows[index].content);
-  if (level >= currentIndentation) {
-    return isLastInBranch(index, rows);
-  }
   for (let i = index + 1; i < rows.length; i++) {
-    const nextIndentation = getIndentation(rows[i].content);
-    if (nextIndentation === level) {
+    if (rows[i].level === level) {
       return false;
     }
-    if (nextIndentation < level) {
+    if (rows[i].level < level) {
       return true;
     }
   }

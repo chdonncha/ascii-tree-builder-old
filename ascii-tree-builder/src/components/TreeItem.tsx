@@ -5,10 +5,13 @@ import classNames from 'classnames';
 
 interface TreeItemProps {
   row: {
+    id: string;
+    parentId: string | null;
     content: string;
     isSelected: boolean;
-    type: 'file' | 'folder';
     isRenaming?: boolean;
+    type: 'file' | 'folder';
+    level: number;
   };
   index: number;
   totalItems: number; // Total number of items in the list
@@ -59,6 +62,8 @@ export const TreeItem: React.FC<TreeItemProps> = ({
     'child-highlighted': isChildSelected,
   });
 
+  const indentation = '  '.repeat(row.level); // Two spaces per level
+
   return (
     <li key={index} className={itemClassName} onClick={() => setSelectedRow(index)}>
       <span style={{ fontFamily: 'monospace', whiteSpace: 'pre' }}>{prefix}</span>
@@ -77,7 +82,7 @@ export const TreeItem: React.FC<TreeItemProps> = ({
           autoFocus
         />
       ) : (
-        <span style={{ verticalAlign: 'middle' }}>{row.content.trim()}</span>
+        <span style={{ paddingLeft: indentation }}>{row.content}</span>
       )}
     </li>
   );
