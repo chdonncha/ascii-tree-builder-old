@@ -66,35 +66,37 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
     return itemsToMove;
   };
 
+  const getChildrenCount = (startIndex, rows, level) => {
+    let count = 0;
+    for (let i = startIndex + 1; i < rows.length && rows[i].level > level; i++) {
+      count++;
+    }
+    return count;
+  };
+
   const moveRowDown = () => {
     if (selectedRow < rows.length - 1) {
       addToUndoStack(rows);
       let newRows = [...rows];
-      const itemToMove = newRows[selectedRow];
 
-      // Get the items to move, which includes the selected item and its children
-      const itemsToMove = getItemsToMove(itemToMove, newRows);
+      // Calculate the total number of items to move, which includes the selected item and its children
+      const totalItemsToMove = 1 + getChildrenCount(selectedRow, rows, rows[selectedRow].level);
 
-      // Remove the items from the current position
-      newRows.splice(selectedRow, itemsToMove.length);
+      // Check if the move is possible
+      const targetIndex = selectedRow + totalItemsToMove;
+      if (targetIndex >= rows.length) return; // Can't move down if there's no room
 
-      // Find the position right below the next item or its children at the same level
-      let insertionIndex = selectedRow + 1; // Start from the next item
-      // Look ahead to find the next item at the same or lower level than itemToMove
-      while (insertionIndex < newRows.length && newRows[insertionIndex].level > itemToMove.level) {
-        insertionIndex++;
-      }
-      // If we're not at the end, move past the next item at the same level
-      if (insertionIndex < newRows.length && newRows[insertionIndex].level === itemToMove.level) {
-        insertionIndex++;
-      }
+      // The item immediately after the last child of the selected item
+      const itemAfterChildren = newRows[targetIndex];
 
-      // Insert the items at the new position
-      newRows.splice(insertionIndex, 0, ...itemsToMove);
+      // Remove the itemAfterChildren from the array
+      newRows.splice(targetIndex, 1);
+      // Insert itemAfterChildren before the selected item
+      newRows.splice(selectedRow, 0, itemAfterChildren);
 
-      // Update the selected row index
-      setSelectedRow(insertionIndex - itemsToMove.length);
       setRows(newRows);
+      // Update the selected index to follow the moved row
+      setSelectedRow(selectedRow + 1);
     }
   };
 
