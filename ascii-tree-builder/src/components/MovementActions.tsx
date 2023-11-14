@@ -44,6 +44,33 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
     setSelectedRow(newPosition);
   };
 
+  const moveRowDown = () => {
+    if (selectedRow >= rows.length - 1) return;
+
+    addToUndoStack(rows);
+    let newRows = [...rows];
+
+    const itemsToMove = getItemsToMove(newRows[selectedRow], newRows); // Item and its children
+    const totalItemsToMove = itemsToMove.length;
+
+    // Check if we're not at the end of the list
+    if (selectedRow + totalItemsToMove >= rows.length) {
+      return; // Can't move down if there's no room
+    }
+
+    // Determine the insert position which is just one position down from the current position
+    const insertPosition = selectedRow + 1;
+
+    // Remove items from the current position
+    const itemsRemoved = newRows.splice(selectedRow, totalItemsToMove);
+
+    // Insert them at the next position down
+    newRows.splice(insertPosition, 0, ...itemsRemoved);
+
+    setRows(newRows);
+    setSelectedRow(insertPosition);
+  };
+
   const getItemsToMove = (itemToMove, rows) => {
     // This function finds the item and all of its direct children.
     const itemsToMove = [itemToMove];
@@ -64,40 +91,6 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
     addChildren(itemToMove.id, itemToMove.level);
 
     return itemsToMove;
-  };
-
-  const getChildrenCount = (startIndex, rows, level) => {
-    let count = 0;
-    for (let i = startIndex + 1; i < rows.length && rows[i].level > level; i++) {
-      count++;
-    }
-    return count;
-  };
-
-  const moveRowDown = () => {
-    if (selectedRow < rows.length - 1) {
-      addToUndoStack(rows);
-      let newRows = [...rows];
-
-      // Calculate the total number of items to move, which includes the selected item and its children
-      const totalItemsToMove = 1 + getChildrenCount(selectedRow, rows, rows[selectedRow].level);
-
-      // Check if the move is possible
-      const targetIndex = selectedRow + totalItemsToMove;
-      if (targetIndex >= rows.length) return; // Can't move down if there's no room
-
-      // The item immediately after the last child of the selected item
-      const itemAfterChildren = newRows[targetIndex];
-
-      // Remove the itemAfterChildren from the array
-      newRows.splice(targetIndex, 1);
-      // Insert itemAfterChildren before the selected item
-      newRows.splice(selectedRow, 0, itemAfterChildren);
-
-      setRows(newRows);
-      // Update the selected index to follow the moved row
-      setSelectedRow(selectedRow + 1);
-    }
   };
 
   const stepRowOut = () => {
