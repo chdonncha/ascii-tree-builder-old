@@ -16,6 +16,7 @@ export interface Row {
   parentId: string | null;
   content: string;
   isSelected: boolean;
+  isChildSelected?: boolean;
   isRenaming?: boolean;
   type: 'file' | 'folder';
   level: number;
@@ -108,21 +109,24 @@ const TreeBuilder: React.FC = () => {
     return rowIndentation > selectedRowIndentation;
   };
 
-  const handleSetSelectedRow = (index) => {
+  const handleSetSelectedRow = (index: number) => {
     if (!isRenaming) {
-      // Reset selection for all rows
-      const updatedRows = rows.map((row, index) => ({ ...row, isSelected: false }));
+      // Reset selection and child highlighting for all rows
+      const updatedRows = rows.map((row) => ({
+        ...row,
+        isSelected: false,
+        isChildSelected: false,
+      }));
 
-      // Select the clicked row and its children
       updatedRows[index].isSelected = true;
 
-      const selectedRowIndentation = rows[index].level * 2;
+      // Highlight all children of the selected row
+      const selectedRowLevel = updatedRows[index].level;
       for (let i = index + 1; i < rows.length; i++) {
-        const rowIndentation = rows[i].level * 2;
-        if (rowIndentation > selectedRowIndentation) {
-          updatedRows[i].isSelected = true;
+        if (rows[i].level > selectedRowLevel) {
+          updatedRows[i].isChildSelected = true;
         } else {
-          break;
+          break; // No need to check further as we have passed the children
         }
       }
 
@@ -171,7 +175,7 @@ const TreeBuilder: React.FC = () => {
             // Make sure to return the TreeItem component
             return (
               <TreeItem
-                key={index}
+                key={row.id}
                 row={row}
                 index={index}
                 isRenaming={isRenaming}
@@ -180,7 +184,7 @@ const TreeBuilder: React.FC = () => {
                 submitRename={submitRename}
                 prefix={generateAsciiPrefixForNode(index, rows)}
                 totalItems={rows.length}
-                isChildSelected={isChildSelected}
+                isChildSelected={row.isChildSelected}
                 setSelectedRow={() => handleSetSelectedRow(index)}
               />
             );
