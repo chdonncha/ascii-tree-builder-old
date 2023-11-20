@@ -12,10 +12,14 @@ import { SAMPLE_TREE_DATA } from '../utils/sampleTreeData';
 import { getIndentation, canNodeIndentFurther, generateAsciiPrefixForNode } from '../utils/treeUtils';
 
 export interface Row {
+  id: string;
+  parentId: string | null;
   content: string;
   isSelected: boolean;
+  isChildSelected?: boolean;
   isRenaming?: boolean;
   type: 'file' | 'folder';
+  level: number;
 }
 
 const TreeBuilder: React.FC = () => {
@@ -44,7 +48,8 @@ const TreeBuilder: React.FC = () => {
       if (selectedRow >= 0 && selectedRow < rows.length) {
         const newRows = rows.map((row) => ({ ...row, isRenaming: false })); // Reset isRenaming for all rows
         const newName = renameValue.trim(); // Trim the input value
-        const indentation = ' '.repeat(getIndentation(newRows[selectedRow].content));
+        const level = rows[selectedRow].level;
+        const indentation = ' '.repeat(level * 2);
         newRows[selectedRow] = {
           ...newRows[selectedRow],
           content: `${indentation}${newName}`,
@@ -70,12 +75,10 @@ const TreeBuilder: React.FC = () => {
 
   const generateAsciiRepresentation = () => {
     const asciiRows: string[] = [];
-
     rows.forEach((row, index) => {
       const prefix = generateAsciiPrefixForNode(index, rows);
       asciiRows.push(prefix + row.content.trim());
     });
-
     setAsciiRepresentation(asciiRows);
   };
 
@@ -106,21 +109,24 @@ const TreeBuilder: React.FC = () => {
     return rowIndentation > selectedRowIndentation;
   };
 
-  const handleSetSelectedRow = (index) => {
+  const handleSetSelectedRow = (index: number) => {
     if (!isRenaming) {
-      // Reset selection for all rows
-      const updatedRows = rows.map((row, index) => ({ ...row, isSelected: false }));
+      // Reset selection and child highlighting for all rows
+      const updatedRows = rows.map((row) => ({
+        ...row,
+        isSelected: false,
+        isChildSelected: false,
+      }));
 
-      // Select the clicked row and its children
       updatedRows[index].isSelected = true;
 
-      const selectedRowIndentation = getIndentation(rows[index].content);
+      // Highlight all children of the selected row
+      const selectedRowLevel = updatedRows[index].level;
       for (let i = index + 1; i < rows.length; i++) {
-        const rowIndentation = getIndentation(rows[i].content);
-        if (rowIndentation > selectedRowIndentation) {
-          updatedRows[i].isSelected = true;
+        if (rows[i].level > selectedRowLevel) {
+          updatedRows[i].isChildSelected = true;
         } else {
-          break;
+          break; // No need to check further as we have passed the children
         }
       }
 
@@ -169,7 +175,7 @@ const TreeBuilder: React.FC = () => {
             // Make sure to return the TreeItem component
             return (
               <TreeItem
-                key={index}
+                key={row.id}
                 row={row}
                 index={index}
                 isRenaming={isRenaming}
@@ -178,7 +184,7 @@ const TreeBuilder: React.FC = () => {
                 submitRename={submitRename}
                 prefix={generateAsciiPrefixForNode(index, rows)}
                 totalItems={rows.length}
-                isChildSelected={isChildSelected}
+                isChildSelected={row.isChildSelected}
                 setSelectedRow={() => handleSetSelectedRow(index)}
               />
             );

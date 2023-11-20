@@ -1,9 +1,10 @@
 import React from 'react';
 import { Button } from '@mui/material';
+import { Row } from './TreeBuilder';
 
 interface FileFolderActionsProps {
-  rows: { content: string; isSelected: boolean; type: 'file' | 'folder' }[];
-  setRows: React.Dispatch<React.SetStateAction<{ content: string; isSelected: boolean; type: 'file' | 'folder' }[]>>;
+  rows: Row[];
+  setRows: React.Dispatch<React.SetStateAction<Row[]>>;
   selectedRow: number;
   addToUndoStack: (rows: any) => void;
 }
@@ -13,23 +14,25 @@ export const FileFolderActions: React.FC<FileFolderActionsProps> = ({ rows, setR
     const newFileName = prompt('Enter the new file name:');
     if (newFileName) {
       const newRows = [...rows];
+      let newId = generateUniqueId();
+      let parentId = null;
+      let level = 0;
+
       if (selectedRow >= 0) {
-        // Get the indentation of the selected row.
-        const match = rows[selectedRow]?.content.match(/^ */);
-        const indentation = match ? match[0].length : 0;
-
-        let positionToInsert = selectedRow + 1;
-
-        // Insert the new file right after the selected row.
-        newRows.splice(positionToInsert, 0, {
-          content: ' '.repeat(indentation) + newFileName,
-          isSelected: false,
-          type: 'file',
-        });
-      } else {
-        // Add to the bottom of the hierarchy
-        newRows.push({ content: newFileName, isSelected: false, type: 'file' });
+        parentId = rows[selectedRow].id;
+        level = rows[selectedRow].level;
       }
+
+      // Insert the new file
+      newRows.push({
+        id: newId,
+        parentId: parentId,
+        level: level + 1, // increment level by one if it's a child
+        content: newFileName,
+        isSelected: false,
+        type: 'file',
+      });
+
       setRows(newRows);
     }
   };
@@ -39,28 +42,32 @@ export const FileFolderActions: React.FC<FileFolderActionsProps> = ({ rows, setR
     let newFolderName = prompt('Enter the new folder name:');
     if (newFolderName) {
       newFolderName = newFolderName.trim().replace(/\/+$/, '') + '/';
-
       const newRows = [...rows];
+      let newId = generateUniqueId();
+      let parentId = null;
+      let level = 0;
+
       if (selectedRow >= 0) {
-        // Get the indentation of the selected row.
-        const match = rows[selectedRow]?.content.match(/^ */);
-        const indentation = match ? match[0].length : 0;
-
-        let positionToInsert = selectedRow + 1;
-
-        // Insert the new folder right after the selected row.
-        newRows.splice(positionToInsert, 0, {
-          content: ' '.repeat(indentation) + newFolderName,
-          isSelected: false,
-          type: 'folder',
-        });
-      } else {
-        // Add to the bottom of the hierarchy
-        newRows.push({ content: newFolderName, isSelected: false, type: 'folder' });
+        parentId = rows[selectedRow].id;
+        level = rows[selectedRow].level;
       }
+
+      newRows.push({
+        id: newId,
+        parentId: parentId,
+        level: level,
+        content: newFolderName,
+        isSelected: false,
+        type: 'folder',
+      });
+
       setRows(newRows);
     }
   };
+
+  function generateUniqueId() {
+    return '_' + Math.random().toString(36).substr(2, 9);
+  }
 
   return (
     <>

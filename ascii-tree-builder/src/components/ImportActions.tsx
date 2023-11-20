@@ -8,6 +8,7 @@ interface ImportActionsProps {
 }
 
 interface TreeNode {
+  id: string;
   name: string;
   type: 'file' | 'folder';
   children?: TreeNode[];
@@ -35,6 +36,7 @@ const parseTree = (text: string): TreeNode[] => {
     const name = line.replace(/(├──|└──|│   )/g, '').trim();
 
     const node: TreeNode = {
+      id: generateUniqueId(),
       name,
       type: determineType(name),
     };
@@ -59,19 +61,25 @@ const parseTree = (text: string): TreeNode[] => {
   return root;
 };
 
-const rowsFromTreeNodes = (nodes: TreeNode[], depth: number = 0): Row[] => {
+function generateUniqueId() {
+  return '_' + Math.random().toString(36).substr(2, 9);
+}
+
+const rowsFromTreeNodes = (nodes: TreeNode[], depth: number = 0, parentId: string | null = null): Row[] => {
   let rows: Row[] = [];
   nodes.forEach((node) => {
-    const prefixSpaces = '  '.repeat(depth);
-
     rows.push({
-      content: prefixSpaces + node.name,
+      id: generateUniqueId(),
+      parentId: parentId,
+      level: depth,
+      content: node.name.trim(),
       isSelected: false,
-      type: node.type,
+      isRenaming: false,
+      type: node.type as 'file' | 'folder',
     });
 
     if (node.children) {
-      rows = rows.concat(rowsFromTreeNodes(node.children, depth + 1));
+      rows = rows.concat(rowsFromTreeNodes(node.children, depth + 1, node.id));
     }
   });
   return rows;
