@@ -30,37 +30,40 @@ export const EditActions: React.FC<EditActionsProps> = ({
   const deleteRow = () => {
     if (selectedRow === -1) return; // If no row is selected, do nothing
 
-    const newRows = [...rows];
+    const rowToDeleteId = rows[selectedRow].id;
 
-    // Identify the children to delete based on indentation
-    const currentIndentation = getIndentation(newRows[selectedRow].content);
+    // Add current state to undo stack before deletion
+    addToUndoStack(rows);
 
-    let lastIndexToDelete = selectedRow;
-    for (let i = selectedRow + 1; i < newRows.length; i++) {
-      if (getIndentation(newRows[i].content) > currentIndentation) {
-        lastIndexToDelete = i;
-      } else {
-        break;
+    // Recursively collect IDs of row to delete and all its children
+    const idsToDelete = new Set<string>();
+    const collectIdsToDelete = (rowId: string) => {
+      idsToDelete.add(rowId);
+      rows.forEach((row) => {
+        if (row.parentId === rowId) {
+          collectIdsToDelete(row.id);
+        }
+      });
+    };
+
+    collectIdsToDelete(rowToDeleteId);
+
+    // Filter out the rows to delete and update isSelected property
+    const newRows = rows.filter((row) => {
+      if (idsToDelete.has(row.id)) {
+        return false; // Exclude the row from the new array
       }
-    }
-
-    // Delete the selected row and its children
-    newRows.splice(selectedRow, lastIndexToDelete - selectedRow + 1);
+      // If the row was previously selected, deselect it
+      if (row.isSelected) {
+        row.isSelected = false;
+      }
+      return true;
+    });
 
     // Adjust the selected row after deletion
-    let newRowToSelect = -1;
-
-    // If it wasn't the first row, select the previous row
-    if (selectedRow > 0) {
-      newRowToSelect = selectedRow - 1;
-    }
-    // If it was the first row and there are still rows available, select the next row
-    else if (selectedRow === 0 && newRows.length > 0) {
-      newRowToSelect = 0;
-    }
+    setSelectedRow(-1); // Deselect any row since the selected row is deleted
 
     setRows(newRows);
-    setSelectedRow(newRowToSelect);
   };
 
   const startRenaming = () => {
