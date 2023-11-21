@@ -77,7 +77,10 @@ export const EditActions: React.FC<EditActionsProps> = ({
   };
 
   const clearAllRows = () => {
+    addToUndoStack(rows);
     setRows([]);
+    setSelectedRow(-1);
+    setIsRenaming(false);
   };
 
   return (
