@@ -22,19 +22,22 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
   canNodeIndentFurther,
 }) => {
   const moveRowUp = () => {
-    if (selectedRow <= 0) return; // Can't move up the first row
+    if (selectedRow <= 0) {
+      return; // Can't move up the first row
+    }
 
     addToUndoStack(rows);
 
     const newRows = [...rows];
     const itemToMove = newRows[selectedRow];
-    const itemsToMove = getItemsToMove(itemToMove, newRows); // Item and its children
+    const itemsToMove = getItemsToMove(itemToMove, newRows);
     const newPosition = selectedRow - 1;
 
-    // Remove items from the current position
-    newRows.splice(selectedRow, itemsToMove.length);
+    if (newRows[newPosition].level < itemToMove.level - 1) {
+      return; // Invalid move: trying to move an item above root
+    }
 
-    // Insert them at the new position
+    newRows.splice(selectedRow, itemsToMove.length);
     newRows.splice(newPosition, 0, ...itemsToMove);
 
     setRows(newRows);
