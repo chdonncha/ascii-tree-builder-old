@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { Button } from '@mui/material';
-import { isLastInBranch } from '../utils/treeUtils';
 import { Row } from './TreeBuilder';
 
 type MovementActionsProps = {
@@ -114,7 +113,7 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
   };
 
   const applyLevelToChildren = (parentId, level) => {
-    const startIndex = rows.findIndex(r => r.id === parentId);
+    const startIndex = rows.findIndex((r) => r.id === parentId);
     if (startIndex === -1) return;
 
     for (let i = startIndex + 1; i < rows.length && rows[i].parentId === parentId; i++) {
@@ -176,10 +175,10 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
         ↓
       </Button>
       <Button
-          variant="contained"
-          className="button-style"
-          disabled={selectedRow < 0 || rows[selectedRow].level === 0}
-          onClick={stepRowOut}
+        variant="contained"
+        className="button-style"
+        disabled={selectedRow < 0 || rows[selectedRow].level === 0}
+        onClick={stepRowOut}
       >
         ←
       </Button>

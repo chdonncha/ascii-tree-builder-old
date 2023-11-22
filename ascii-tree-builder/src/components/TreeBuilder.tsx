@@ -28,9 +28,25 @@ const TreeBuilder: React.FC = () => {
   const [asciiRepresentation, setAsciiRepresentation] = useState<string[]>([]);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const { addToUndoStack, undo, redo } = useUndoRedoStack(rows, setRows);
+  const containerRef = useRef<HTMLUListElement>(null);
+
+  const handleClickOutside = () => {
+    if (!isRenaming) {
+      setSelectedRow(-1); // Deselect row
+
+      const newRows = rows.map((row) => ({
+        ...row,
+        isSelected: false,
+        isChildSelected: false,
+      }));
+
+      setRows(newRows);
+    }
+  };
+
+  useClickOutside(containerRef, handleClickOutside);
 
   useEffect(() => {
     generateAsciiRepresentation();
@@ -167,7 +183,7 @@ const TreeBuilder: React.FC = () => {
             redo={redo}
           />
         </div>
-        <ul className="input-list">
+        <ul className="input-list" ref={containerRef}>
           {rows.map((row, index) => {
             const isSelected = index === selectedRow;
             const isChildSelected = selectedRow >= 0 ? isChildOfSelectedRow(index, selectedRow, rows) : false;

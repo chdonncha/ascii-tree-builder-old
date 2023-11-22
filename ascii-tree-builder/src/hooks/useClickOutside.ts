@@ -3,7 +3,12 @@ import React, { useEffect } from 'react';
 export function useClickOutside(ref: React.RefObject<HTMLElement>, callback: () => void) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      // Check if the clicked element is not a button and is outside of the ref element
+      if (
+        ref.current &&
+        !ref.current.contains(event.target as Node) &&
+        (event.target as HTMLElement).nodeName !== 'BUTTON'
+      ) {
         callback();
       }
     };

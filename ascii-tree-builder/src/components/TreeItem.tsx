@@ -2,19 +2,12 @@ import React, { useEffect } from 'react';
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import classNames from 'classnames';
+import { Row } from './TreeBuilder';
 
 interface TreeItemProps {
-  row: {
-    id: string;
-    parentId: string | null;
-    content: string;
-    isSelected: boolean;
-    isRenaming?: boolean;
-    type: 'file' | 'folder';
-    level: number;
-  };
+  row: Row;
   index: number;
-  totalItems: number; // Total number of items in the list
+  totalItems: number;
   isRenaming?: boolean;
   renameValue: string;
   handleRenameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -59,7 +52,7 @@ export const TreeItem: React.FC<TreeItemProps> = ({
 
   const itemClassName = classNames({
     highlighted: row.isSelected,
-    'child-highlighted': isChildSelected,
+    'child-highlighted': row.isChildSelected,
   });
 
   const indentation = '  '.repeat(row.level); // Two spaces per level
