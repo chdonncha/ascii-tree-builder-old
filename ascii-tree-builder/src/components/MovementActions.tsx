@@ -30,8 +30,6 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
     const newRows = [...rows];
     const itemToMove = newRows[selectedRow];
     const itemsToMove = getItemsToMove(itemToMove, newRows); // Item and its children
-
-    // Calculate the new position (immediately above the previous row)
     const newPosition = selectedRow - 1;
 
     // Remove items from the current position
@@ -53,10 +51,7 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
     const itemsToMove = getItemsToMove(newRows[selectedRow], newRows); // Item and its children
     const totalItemsToMove = itemsToMove.length;
 
-    // Check if we're not at the end of the list
-    if (selectedRow + totalItemsToMove >= rows.length) {
-      return; // Can't move down if there's no room
-    }
+    if (selectedRow + totalItemsToMove >= rows.length) return;
 
     // Determine the insert position which is just one position down from the current position
     const insertPosition = selectedRow + 1;
@@ -72,79 +67,68 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
   };
 
   const getItemsToMove = (itemToMove, rows) => {
-    // This function finds the item and all of its direct children.
     const itemsToMove = [itemToMove];
     const startIndex = rows.indexOf(itemToMove);
     const endOfList = rows.length;
 
-    // Use a recursive function to add children.
     const addChildren = (parentId, level) => {
       for (let i = startIndex + 1; i < endOfList; i++) {
         if (rows[i].parentId === parentId) {
           itemsToMove.push(rows[i]);
-          addChildren(rows[i].id, level + 1); // Add children of this child
+          addChildren(rows[i].id, level + 1);
         }
       }
     };
 
-    // Start the recursive search for children with the level of the item being moved.
     addChildren(itemToMove.id, itemToMove.level);
 
     return itemsToMove;
   };
 
-  const stepRowOut = () => {
+  const changeIndentation = (delta) => {
+    if (selectedRow < 0) return;
+
     addToUndoStack(rows);
     const newRows = [...rows];
-    const currentIndentation = getIndentation(newRows[selectedRow].content);
+    const row = newRows[selectedRow];
 
-    // Make sure we're not trying to unindent a top-level item
-    if (currentIndentation > 0) {
-      // Find all children of the current row that should move along with it
-      const childrenToMove = [];
-      let currentChildIndex = selectedRow + 1;
-      while (
-        currentChildIndex < newRows.length &&
-        getIndentation(newRows[currentChildIndex].content) > currentIndentation
-      ) {
-        childrenToMove.push(currentChildIndex);
-        currentChildIndex++;
+    if ((delta > 0 && !canNodeIndentFurther(selectedRow)) || (delta < 0 && row.level === 0)) return;
+
+    addToUndoStack(rows);
+
+    let newLevel = row.level + delta;
+
+    // This check depends on the new level and should remain separate
+    if (delta > 0) {
+      const aboveRow = newRows[selectedRow - 1];
+      if (aboveRow && newLevel > aboveRow.level + 1) {
+        newLevel = aboveRow.level + 1;
       }
+    }
 
-      // Update the indentation of the parent node
-      newRows[selectedRow].content = ' '.repeat(currentIndentation - 2) + newRows[selectedRow].content.trim();
+    // Update the level of the selected row and its children
+    row.level = newLevel;
+    applyLevelToChildren(row.id, newLevel);
 
-      // Update the indentation of the children nodes, if any exist
-      for (let childIndex of childrenToMove) {
-        newRows[childIndex].content =
-          ' '.repeat(getIndentation(newRows[childIndex].content) - 2) + newRows[childIndex].content.trim();
-      }
+    setRows(newRows);
+  };
 
-      // Check if the next item exists and is a file
-      if (selectedRow + 1 < newRows.length && newRows[selectedRow + 1].type === 'file') {
-        // Check if it has equal or greater indentation (would become a child)
-        if (getIndentation(newRows[selectedRow + 1].content) >= currentIndentation) {
-          // Adjust the indentation to be a sibling instead of a child
-          newRows[selectedRow + 1].content =
-            ' '.repeat(currentIndentation - 2) + newRows[selectedRow + 1].content.trim();
-        }
-      }
+  const applyLevelToChildren = (parentId, level) => {
+    const startIndex = rows.findIndex(r => r.id === parentId);
+    if (startIndex === -1) return;
 
-      setRows(newRows);
+    for (let i = startIndex + 1; i < rows.length && rows[i].parentId === parentId; i++) {
+      rows[i].level = level + 1;
+      applyLevelToChildren(rows[i].id, level + 1); // Recurse for children
     }
   };
 
+  const stepRowOut = () => {
+    changeIndentation(-1); // Decrease level
+  };
+
   const stepRowIn = () => {
-    if (canNodeIndentFurther(selectedRow)) {
-      addToUndoStack(rows);
-      const newRows = [...rows];
-      const currentIndentation = getIndentation(newRows[selectedRow].content);
-      const aboveRowIndentation = getIndentation(newRows[selectedRow - 1].content);
-      if (currentIndentation <= aboveRowIndentation) {
-        newRows[selectedRow].content = ' '.repeat(currentIndentation + 2) + newRows[selectedRow].content.trim();
-        setRows(newRows);
-      }
-    }
+    changeIndentation(1); // Increase level
   };
 
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -192,10 +176,10 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
         ↓
       </Button>
       <Button
-        variant="contained"
-        className="button-style"
-        disabled={selectedRow < 0 || (selectedRow === 0 && getIndentation(rows[selectedRow].content) === 0)}
-        onClick={stepRowOut}
+          variant="contained"
+          className="button-style"
+          disabled={selectedRow < 0 || rows[selectedRow].level === 0}
+          onClick={stepRowOut}
       >
         ←
       </Button>
