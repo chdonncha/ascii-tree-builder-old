@@ -63,8 +63,7 @@
 }
 
 .vertical-spacing {
-  margin-top: 20px;
-  margin-bottom: 20px;
+  height: 50px;
 }
 
 .container {
@@ -86,7 +85,6 @@
 
 @media (max-width: 768px) {
   .vertical-spacing {
-    margin-top: 0;
-    margin-bottom: 0;
+    height: 0;
   }
 }
