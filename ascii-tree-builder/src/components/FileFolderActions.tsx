@@ -52,12 +52,26 @@ export const FileFolderActions: React.FC<FileFolderActionsProps> = ({ rows, setR
     }
   };
 
+  const isFileSelected = (): boolean => {
+    return selectedRow >= 0 && rows[selectedRow].type === 'file';
+  };
+
   return (
     <>
-      <Button variant="contained" className="button-style" onClick={() => addItem('folder')}>
+      <Button
+        variant="contained"
+        className="button-style"
+        onClick={() => addItem('folder')}
+        disabled={isFileSelected()} // Disable the button if a file is selected
+      >
         Add Folder
       </Button>
-      <Button variant="contained" className="button-style" onClick={() => addItem('file')}>
+      <Button
+        variant="contained"
+        className="button-style"
+        onClick={() => addItem('file')}
+        disabled={isFileSelected()} // Disable the button if a file is selected
+      >
         Add File
       </Button>
     </>
