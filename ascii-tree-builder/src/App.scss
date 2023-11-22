@@ -23,15 +23,19 @@ body {
   color: #61dafb;
 }
 
+.instructions-container li {
+  list-style-type: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
 .tree-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 70vh;
-}
 
-.instructions-container li {
-  list-style-type: none;
-  padding-left: 0;
-  margin-left: 0;
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 }

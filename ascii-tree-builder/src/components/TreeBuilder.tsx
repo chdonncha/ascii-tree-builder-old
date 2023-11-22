@@ -208,8 +208,8 @@ const TreeBuilder: React.FC = () => {
         </ul>
       </div>
       <div className="output-box space-left">
-        <div className="button-row"></div>
-        <div className="button-row"></div>
+        <div className="vertical-spacing"></div>
+        <div className="vertical-spacing"></div>
         <div className="button-row">
           <Button variant="contained" className="button-style" onClick={copyToClipboard}>
             Copy to Clipboard
