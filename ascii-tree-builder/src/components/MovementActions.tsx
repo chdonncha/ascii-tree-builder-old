@@ -23,20 +23,22 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
 }) => {
   const moveRowUp = () => {
     if (selectedRow <= 0) {
-      return; // Can't move up the first row
+      return; // Can't move up the first row (Root)
     }
 
     addToUndoStack(rows);
 
     const newRows = [...rows];
     const itemToMove = newRows[selectedRow];
-    const itemsToMove = getItemsToMove(itemToMove, newRows);
     const newPosition = selectedRow - 1;
 
-    if (newRows[newPosition].level < itemToMove.level - 1) {
-      return; // Invalid move: trying to move an item above root
+    // Check if moving above Root or to an invalid position
+    if (newPosition === 0 || newRows[newPosition].level < itemToMove.level - 1) {
+      return;
     }
 
+    // Normal move up within the tree
+    const itemsToMove = getItemsToMove(itemToMove, newRows);
     newRows.splice(selectedRow, itemsToMove.length);
     newRows.splice(newPosition, 0, ...itemsToMove);
 
@@ -171,7 +173,7 @@ export const MovementActions: React.FC<MovementActionsProps> = ({
 
   return (
     <>
-      <Button variant="contained" className="button-style" disabled={selectedRow < 0} onClick={moveRowUp}>
+      <Button variant="contained" className="button-style" disabled={selectedRow <= 1} onClick={moveRowUp}>
         ↑
       </Button>
       <Button variant="contained" className="button-style" disabled={selectedRow < 0} onClick={moveRowDown}>
