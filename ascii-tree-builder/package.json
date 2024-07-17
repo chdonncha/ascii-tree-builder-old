@@ -1,6 +1,6 @@
 {
-  "homepage": "https://chdonncha.github.io/ascii-tree-builder/",
-  "name": "ascii-tree-builder",
+  "homepage": "https://chdonncha.github.io/ascii-tree-builder-old/",
+  "name": "ascii-tree-builder-old",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
